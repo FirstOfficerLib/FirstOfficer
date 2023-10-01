@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <PackageProjectUrl>https://github.com/FirstOfficerLib/FirstOfficer</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/FirstOfficerLib/FirstOfficer</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>FirstOfficer;ORM;API;AI;SourceGeneration</PackageTags>
+    <IsPackable>true</IsPackable>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <Version>0.0.0.1-alpha</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>FirstOfficerLib;plankCode</Authors>
+    <Description>First Office is a C# code generation tool for building very high preformance Web APIs.</Description>
+  </PropertyGroup>
+
+</Project>

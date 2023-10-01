@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Roslyn": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "..\\..\\Cedar\\Cedar.Models\\Cedar.Models.csproj"
+    },
+    "RoslynTesting": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "..\\FirstOfficer.Tests\\FirstOfficer.Tests.csproj"
+    }
+  }
+}

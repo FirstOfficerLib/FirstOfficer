@@ -24,15 +24,12 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.7.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
     <PackageReference Include="Npgsql" Version="7.0.6" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.11" />
     <PackageReference Include="Pluralize.NET" Version="1.0.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\FirstOfficer.Core\FirstOfficer.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Query\" />
   </ItemGroup>
 
 </Project>

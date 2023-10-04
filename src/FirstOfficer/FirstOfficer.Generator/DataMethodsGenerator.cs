@@ -84,7 +84,9 @@ namespace FirstOfficer.Generator
 
                 codeTypeDeclaration.Members.Add(
                     new CodeSnippetTypeMember(EntityMapper.GetTemplate(entitiesDeclaration)));
-
+                
+                codeTypeDeclaration.Members.Add(
+                    new CodeSnippetTypeMember(DatabaseQueryable.GetTemplate(entitiesDeclaration)));
 
                 codeTypeDeclaration.Members.Add(
                     new CodeSnippetTypeMember(EntityEnums.GetTemplate(entitiesDeclaration)));

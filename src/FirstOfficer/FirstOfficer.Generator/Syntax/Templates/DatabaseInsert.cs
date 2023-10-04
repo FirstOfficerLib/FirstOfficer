@@ -1,6 +1,7 @@
 ﻿using FirstOfficer.Generator.Extensions;
 using FirstOfficer.Generator.Helpers;
 using Microsoft.CodeAnalysis;
+using Pluralize.NET;
 
 namespace FirstOfficer.Generator.Syntax.Templates
 {
@@ -13,10 +14,39 @@ namespace FirstOfficer.Generator.Syntax.Templates
             var properties = CodeAnalysisHelper.GetMappedProperties(entitySymbol).ToArray();
             var columnProperties = CodeAnalysisHelper.GetMappedProperties(entitySymbol).Select(a => a.Name.ToSnakeCase()).ToArray();
             var valueProperties = CodeAnalysisHelper.GetMappedProperties(entitySymbol).Select(p => p.Name).ToArray();
+            var oneToOnes = CodeAnalysisHelper.GetOneToOneProperties(entitySymbol).ToArray();
 
             var rtn = $@"
-        private static async Task Insert{entityName}(IDbConnection dbConnection, IEnumerable<{entitySymbol.FullName()}> insertEntities, IDbTransaction transaction)
+        private static async Task Insert{entityName}(IDbConnection dbConnection, IEnumerable<{entitySymbol.FullName()}> insertEntities, IDbTransaction transaction, bool saveChildren = false)
         {{
+
+            if(saveChildren)
+            {{
+            ValidateChildren(insertEntities);
+            //handle one-to-one
+            ";
+            foreach (var oneToOne in oneToOnes)
+            {
+                rtn += $"await dbConnection.Save{new Pluralizer().Pluralize(oneToOne.Type.Name)}(insertEntities.Where(a=> a.{oneToOne.Name} != null).Select(a=> a.{oneToOne.Name}), transaction);";
+            }
+
+            rtn += $@"  
+            foreach(var entity in insertEntities)
+            {{
+";
+
+            foreach (var oneToOne in oneToOnes)
+            {
+                rtn += $@"if(entity.{oneToOne.Type.Name} != null)
+                            {{
+                            entity.{oneToOne.Type.Name}Id = entity.{oneToOne.Type.Name}.Id;
+                            }}
+                            ";
+            }
+
+            rtn += $@"
+            }} //saveChildren
+            }}
             var take = Convert.ToInt32(65535 / {columnProperties.Length});
             var count = 0;
             var skip = 0;
@@ -76,7 +106,25 @@ namespace FirstOfficer.Generator.Syntax.Templates
                 batch = insertEntities.Skip(skip).Take(take);
             }}
         }}
+
+        private static void ValidateChildren(IEnumerable<{entitySymbol.FullName()}> insertEntities)
+        {{
+
 ";
+            foreach (var oneToOne in oneToOnes)
+            {
+                if (properties.Any(a =>
+                        a.Name == $"{oneToOne.Name}Id" &&
+                        ((INamedTypeSymbol)a.Type).FullName() == typeof(long).FullName))
+                {
+                    rtn += $@"if (insertEntities.Any(a => a.Book == null))
+                            {{
+                                throw new FirstOfficer.Data.Exceptions.MissingEntityException(""{oneToOne.Name} is required."");                             
+                            }}";
+                }
+            }
+
+            rtn += $@"      }} ";
             return rtn;
         }
 

@@ -45,7 +45,7 @@ namespace FirstOfficer.Tests.Generator
                 Assert.That(bookCount, Is.EqualTo(count)); //check count
             }
 
-            var allBooks = (await DbConnection.QueryBooks(EntityBook.Includes.None)).ToList();
+            var allBooks = (await DbConnection.QueryBooks(EntityBook.Includes.None, null)).ToList();
             Assert.That(allBooks.Count(), Is.EqualTo(bookCount));
 
             var source = books.OrderBy(a => a.Id).ToList();
@@ -66,7 +66,7 @@ namespace FirstOfficer.Tests.Generator
 
             await transaction.CommitAsync();
 
-            var allBooksCount = (await DbConnection.QueryBooks(EntityBook.Includes.None)).ToList();
+            var allBooksCount = (await DbConnection.QueryBooks(EntityBook.Includes.None, null )).ToList();
             Assert.That(0, Is.EqualTo(allBooksCount.Count));
         }
 
@@ -93,7 +93,7 @@ namespace FirstOfficer.Tests.Generator
 
             await transaction.CommitAsync();
 
-            var allBooks = (await DbConnection.QueryBooks(EntityBook.Includes.None)).ToList();
+            var allBooks = (await DbConnection.QueryBooks(EntityBook.Includes.None, null)).ToList();
             Assert.That(allBooks.Count(), Is.EqualTo(bookCount));
 
             var source = books.OrderBy(a => a.Id).ToList();
@@ -113,12 +113,12 @@ namespace FirstOfficer.Tests.Generator
             await DbConnection.DeleteBooks(books, transaction);
             var conn2 = new NpgsqlConnection(ConnectionString);
             conn2.Open();
-            var allBooks2 = (await conn2.QueryBooks(EntityBook.Includes.None)).ToList();
+            var allBooks2 = (await conn2.QueryBooks(EntityBook.Includes.None, null)).ToList();
             Assert.That(allBooks2.Count(), Is.EqualTo(bookCount));
         
             await transaction.CommitAsync();
 
-            var allBooksCount = (await conn2.QueryBooks(EntityBook.Includes.None)).ToList();
+            var allBooksCount = (await conn2.QueryBooks(EntityBook.Includes.None, null)).ToList();
             Assert.That(0, Is.EqualTo(allBooksCount.Count));
 
             conn2.Close();

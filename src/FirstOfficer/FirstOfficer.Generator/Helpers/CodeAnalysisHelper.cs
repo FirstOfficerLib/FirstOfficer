@@ -56,6 +56,13 @@ namespace FirstOfficer.Generator.Helpers
             return props;
         }
 
+        internal static IEnumerable<IPropertySymbol> GetOneToOneProperties(INamedTypeSymbol entitySymbol)
+        {
+            return GetAllProperties(entitySymbol).Where(a =>
+                a.Type is INamedTypeSymbol { IsGenericType: false } symbol &&
+                symbol.AllInterfaces.Any(b => b.Name == "IEntity")).ToList();
+        }
+
 
         internal static bool IsTypeOrImplementsInterface(ITypeSymbol typeSymbol, Type targetType)
         {

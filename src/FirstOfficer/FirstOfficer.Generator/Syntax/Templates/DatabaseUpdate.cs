@@ -28,7 +28,7 @@ namespace FirstOfficer.Generator.Syntax.Templates
             updateBuilder.AppendLine($@"{string.Join(",",setters)} FROM (VALUES");
             
             var rtn = $@" 
-        private static async Task Update{entityName}(IDbConnection dbConnection, IEnumerable<{entitySymbol.FullName()}> updateEntities, IDbTransaction transaction)
+        private static async Task Update{entityName}(IDbConnection dbConnection, IEnumerable<{entitySymbol.FullName()}> updateEntities, IDbTransaction transaction, bool saveChildren = false)
         {{   
 
             var take = Convert.ToInt32(65535 / {valueProperties.Count});

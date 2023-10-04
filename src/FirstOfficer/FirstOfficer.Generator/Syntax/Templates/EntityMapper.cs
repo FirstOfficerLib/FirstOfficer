@@ -12,9 +12,9 @@ namespace FirstOfficer.Generator.Syntax.Templates
         {
             var sb = new StringBuilder();
 
-            var dbProps = CodeAnalysisHelper.GetAllProperties(entity).Where(a =>
-                a.Type is INamedTypeSymbol { IsGenericType: false } symbol &&
-                symbol.AllInterfaces.All(b => b.Name != "IEntity")).ToList();
+            var dbProps = GetPropertySymbols(entity);
+
+            var oneToOne = CodeAnalysisHelper.GetOneToOneProperties(entity);
 
             var entityName = entity.Name;
             var tableName = DataHelper.GetTableName(entityName);
@@ -26,24 +26,52 @@ namespace FirstOfficer.Generator.Syntax.Templates
                  while (await reader.ReadAsync())
                 {{
                     var entity = new {entity.FullName()}();
-                    { GetMapping(dbProps, tableName) }
-                    entities.Add(entity);
-                }}
+                    {GetMapping(dbProps, tableName)}                       
+");
+            foreach (var propertySymbol in oneToOne)
+            {
+                sb.Append($"if(reader[\"{DataHelper.GetTableName(propertySymbol.Name)}_id\"] != DBNull.Value)");
+                sb.AppendLine("{");
+                sb.AppendLine($"entity.{propertySymbol.Name} = new();");
+                sb.AppendLine("}");
+                sb.AppendLine(GetMapping(GetPropertySymbols((INamedTypeSymbol)propertySymbol.Type), DataHelper.GetTableName(propertySymbol.Name), propertySymbol.Name));
+            }
+
+            sb.AppendLine($@"                
+                 entities.Add(entity);
+              }}   
                 return entities;
-            }}
+           }}
             ");
 
             return sb.ToString();
         }
 
-        private static string GetMapping(IEnumerable<IPropertySymbol> propertySymbols, string tableName)
+        private static List<IPropertySymbol> GetPropertySymbols(INamedTypeSymbol entity)
+        {
+            return CodeAnalysisHelper.GetAllProperties(entity).Where(a =>
+                a.Type is INamedTypeSymbol { IsGenericType: false } symbol &&
+                symbol.AllInterfaces.All(b => b.Name != "IEntity")).ToList();
+        }
+
+        private static string GetMapping(IEnumerable<IPropertySymbol> propertySymbols, string tableName,
+            string propertyName = "")
         {
             var sb = new StringBuilder();
 
             foreach (var propertySymbol in propertySymbols)
             {
                 var columnName = $"{tableName}_{propertySymbol.Name.ToSnakeCase()}";
-                sb.AppendLine($"if (reader[\"{columnName}\"] != DBNull.Value) entity.{propertySymbol.Name} = ({propertySymbol.Type.Name})reader[\"{columnName}\"];");
+                if (string.IsNullOrEmpty(propertyName))
+                {
+                    sb.AppendLine(
+                        $"if (reader[\"{columnName}\"] != DBNull.Value) entity.{propertySymbol.Name} = ({propertySymbol.Type.Name})reader[\"{columnName}\"];");
+                }
+                else
+                {
+                    sb.AppendLine(
+                        $"if (reader[\"{columnName}\"] != DBNull.Value) entity.{propertyName}.{propertySymbol.Name} = ({propertySymbol.Type.Name})reader[\"{columnName}\"];");
+                }
             }
             return sb.ToString();
         }

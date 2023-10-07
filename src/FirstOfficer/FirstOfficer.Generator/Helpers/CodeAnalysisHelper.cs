@@ -50,7 +50,9 @@ namespace FirstOfficer.Generator.Helpers
         {
             var props = GetAllProperties(entitySymbol).Where(a =>
                 a.Name != "Id" &&
-                a.Type is INamedTypeSymbol { IsGenericType: false } symbol &&
+                a.Type is INamedTypeSymbol symbol &&
+                !IsCollection(symbol) &&
+                !IsEntity(symbol) &&
                 symbol.AllInterfaces.All(b => b.Name != "IEntity")).ToList();
 
             return props;

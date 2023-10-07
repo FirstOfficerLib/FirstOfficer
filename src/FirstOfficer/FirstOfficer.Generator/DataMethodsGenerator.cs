@@ -25,7 +25,7 @@ namespace FirstOfficer.Generator
         {
 
 #if DEBUG
-            //    DebugGenerator.AttachDebugger();
+             //   DebugGenerator.AttachDebugger();
 #endif
 
             //context.RegisterPostInitializationOutput(PostInitializationCallBack);
@@ -82,24 +82,22 @@ namespace FirstOfficer.Generator
                 //add save templates
                 codeTypeDeclaration.Members.Add(SaveGenerator.GenerateSaveMethods(entitiesDeclaration));
 
-                codeTypeDeclaration.Members.Add(
-                    new CodeSnippetTypeMember(EntityMapper.GetTemplate(entitiesDeclaration)));
-                
+                //add query methods
                 codeTypeDeclaration.Members.Add(
                     new CodeSnippetTypeMember(DatabaseQueryable.GetTemplate(entitiesDeclaration)));
 
                 codeTypeDeclaration.Members.Add(
                     new CodeSnippetTypeMember(EntityEnums.GetTemplate(entitiesDeclaration)));
-
-                //add query methods
+                
+                
                 codeTypeDeclaration.Members.Add(
                     new CodeSnippetTypeMember(DatabaseQuery.GetTemplate(entitiesDeclaration)));
 
                 codeTypeDeclaration.Members.Add(
-                    new CodeSnippetTypeMember(DatabaseDelete.GetTemplate(entitiesDeclaration)));
-                codeTypeDeclaration.Members.Add(
-                    new CodeSnippetTypeMember(EntityChecksum.GetTemplate(entitiesDeclaration)));
+                    new CodeSnippetTypeMember(EntityMapper.GetTemplate(entitiesDeclaration)));
 
+                codeTypeDeclaration.Members.Add(
+                    new CodeSnippetTypeMember(DatabaseDelete.GetTemplate(entitiesDeclaration)));
 
                 //write the class
                 var provider = new CSharpCodeProvider();

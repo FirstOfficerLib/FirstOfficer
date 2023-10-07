@@ -12,11 +12,14 @@ namespace FirstOfficer.Generator.Syntax.Templates
         {
 
             var entityName = entitySymbol.Name;
-            var columnProperties = CodeAnalysisHelper.GetMappedProperties(entitySymbol).Select(a => a.Name.ToSnakeCase()).OrderBy(a=> a).ToArray();
+
+            var mappedProperties = CodeAnalysisHelper.GetMappedProperties(entitySymbol).ToArray();
+
+            var columnProperties = CodeAnalysisHelper.GetMappedProperties(entitySymbol).Select(a => a.Name.ToSnakeCase()).OrderBy(a => a).ToArray();
             var properties = CodeAnalysisHelper.GetMappedProperties(entitySymbol).Select(a => a.Name).OrderBy(a => a).ToArray();
 
             var valueProperties = new List<string>() { "Id" };
-             valueProperties.AddRange(properties);
+            valueProperties.AddRange(properties);
 
             var updateBuilder = new StringBuilder();
             updateBuilder.AppendLine($@"UPDATE {DataHelper.GetTableName(entityName)} as a set ");
@@ -25,10 +28,10 @@ namespace FirstOfficer.Generator.Syntax.Templates
             {
                 setters.Add($@"{column} = b.{column}");
             }
-            updateBuilder.AppendLine($@"{string.Join(",",setters)} FROM (VALUES");
-            
+            updateBuilder.AppendLine($@"{string.Join(",", setters)} FROM (VALUES");
+
             var rtn = $@" 
-        private static async Task Update{entityName}(IDbConnection dbConnection, IEnumerable<{entitySymbol.FullName()}> updateEntities, IDbTransaction transaction, bool saveChildren = false)
+        private static async Task Update{entityName}(IDbConnection dbConnection, IEnumerable<{entitySymbol.FullName()}> updateEntities, IDbTransaction transaction)
         {{   
 
             var take = Convert.ToInt32(65535 / {valueProperties.Count});
@@ -46,7 +49,7 @@ namespace FirstOfficer.Generator.Syntax.Templates
                 }}
 
                 updateBuilder.AppendLine($""{{string.Join("","", values)}}"");
-                updateBuilder.AppendLine("") as b(id,{string.Join(",",columnProperties)})"");
+                updateBuilder.AppendLine("") as b(id,{string.Join(",", columnProperties)})"");
                 updateBuilder.AppendLine($""WHERE a.id = b.id;"");
 
                 var sql = updateBuilder.ToString();
@@ -55,9 +58,24 @@ namespace FirstOfficer.Generator.Syntax.Templates
                     for (int i = 0; i < batch.Count(); i++)
                     {{
                         var entity = batch.ElementAt(i);
-                        {string.Join("\r\n",valueProperties.Where(a=> a != "Checksum").Select(a => $@"command.Parameters.AddWithValue($""{a}_{{i}}"", entity.{a});"))}
+                        {string.Join("\r\n", mappedProperties.Where(a => a.Name != "Checksum").Select(prop =>
+            {
+                var rtn = string.Empty;
+
+                if (((INamedTypeSymbol)prop.Type).FullName() == typeof(DateTime).FullName ||
+                    ((INamedTypeSymbol)prop.Type).FullName() == typeof(DateTime?).FullName)
+                {
+                    //GeneratedHelpers.RoundToNearestMillisecond
+
+                    rtn += $@"entity.{prop.Name} = GeneratedHelpers.RoundToNearestMillisecond(entity.{prop.Name});
+                                ";
+                }
+
+
+                return rtn + $@"command.Parameters.AddWithValue($""{prop.Name}_{{i}}"", entity.{prop.Name});";
+            }))}
                         command.Parameters.AddWithValue($""Checksum_{{i}}"", entity.Checksum());
-                        command.Parameters.AddWithValue($""id_{{i}}"", entity.Id);
+                        command.Parameters.AddWithValue($""Id_{{i}}"", entity.Id);
                     }}
 
                     await command.ExecuteNonQueryAsync();

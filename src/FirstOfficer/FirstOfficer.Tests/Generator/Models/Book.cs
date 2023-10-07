@@ -13,24 +13,26 @@ namespace FirstOfficer.Tests.Generator.Models
     [Table("books")]
     public class Book : Entity
     {
-        [Column("title")]
+        [Column("title")]   //for benchmarking for EF Core
         [Queryable]
         public string? Title { get; set; }
-        [Column("page_count")]
+        [Column("page_count")] //for benchmarking for EF Core
         //page count
         public int PageCount => Pages.Count();
 
         [Column("published")]
         public DateTime Published { get; set; }
         [Column("i_sb_n")]
+        [TextSize(50)]
         public string? ISBN { get; set; }
         [Column("description")]
         public string? Description { get; set; }
         [Column("price")]
         public decimal Price { get; set; }
-        
+        //one to many
         public ICollection<Page> Pages { get; set; } = new Collection<Page>();
-        public List<Author> Authors { get; set; } = new();
+        //many to many
+        public IList<Author> Authors { get; set; } = new List<Author>();
 
     }
 }

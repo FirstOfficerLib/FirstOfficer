@@ -13,9 +13,9 @@ namespace FirstOfficer.Tests.Generator.Models
         public long BookId { get; set; }    
         public int? PageNumber { get; set; }
         [TextSize(0)] // Text
-        public string Content { get; set; }
+        public string Content { get; set; } = string.Empty;
 
-        public Book Book { get; set; } = null!;
+        public Book? Book { get; set; } = null;
       
     }
 }

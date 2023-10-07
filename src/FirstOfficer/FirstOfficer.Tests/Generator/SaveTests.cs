@@ -184,7 +184,7 @@ namespace FirstOfficer.Tests.Generator
             await DbConnection.SaveBook(book, transaction);
             await transaction.CommitAsync();
 
-            await AssertSavedBook(book);
+            await AssertSave(book);
 
             //test for update author
             book.Title = string.Empty.RandomString(10);
@@ -193,7 +193,7 @@ namespace FirstOfficer.Tests.Generator
             transaction = await DbConnection.BeginTransactionAsync();
             await DbConnection.SaveBook(book, transaction);
             await transaction.CommitAsync();
-            await AssertSavedBook(book);
+            await AssertSave(book);
 
             //remove book
             var sql = $"DELETE FROM {DataHelper.GetTableName<Book>()} WHERE id = @id";

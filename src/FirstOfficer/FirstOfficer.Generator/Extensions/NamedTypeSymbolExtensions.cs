@@ -11,7 +11,7 @@ namespace FirstOfficer.Generator.Extensions
         internal static string FullName(this INamedTypeSymbol typeSymbol)
         {
             var format = new SymbolDisplayFormat(typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces);
-            return typeSymbol.ToDisplayString(format);
+            return typeSymbol.ToDisplayString(format);  //maybe add "global::" to the beginning
         }
 
 

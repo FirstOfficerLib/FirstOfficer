@@ -9,10 +9,10 @@ namespace FirstOfficer.Tests.Generator.Models
 {
     public class Author : Entity
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         public string? Email { get; set; }
         public string? Website { get; set; }    
-        public virtual List<Book> Books { get; set; } = new();
+        public List<Book> Books { get; set; } = new();
       
     }
 }

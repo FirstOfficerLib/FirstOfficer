@@ -65,6 +65,7 @@ namespace FirstOfficer.Tests.Generator
                 command.CommandText = sql;
                 command.ExecuteNonQuery();
             }
+            await transaction.DisposeAsync();
         }
 
         [Test]
@@ -127,6 +128,7 @@ namespace FirstOfficer.Tests.Generator
                 command.CommandText = sql;
                 command.ExecuteNonQuery();
             }
+            await transaction.DisposeAsync();
         }
 
 
@@ -167,6 +169,7 @@ namespace FirstOfficer.Tests.Generator
             command.Parameters.AddWithValue("@id", author.Id);
             command.ExecuteNonQuery();
             command.Dispose();
+            await transaction.DisposeAsync();
         }
 
         //test for book
@@ -202,8 +205,8 @@ namespace FirstOfficer.Tests.Generator
             command.Parameters.AddWithValue("@id", book.Id);
             command.ExecuteNonQuery();
             command.Dispose();
+            await transaction.DisposeAsync();
 
-            
         }
 
         [Test]
@@ -233,6 +236,7 @@ namespace FirstOfficer.Tests.Generator
             transaction = await DbConnection.BeginTransactionAsync();
             await DbConnection.DeleteBook(book, transaction);
             await transaction.CommitAsync();
+            await transaction.DisposeAsync();
         }
 
           

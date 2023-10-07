@@ -13,6 +13,7 @@ namespace FirstOfficer.Generator.Syntax.Templates
         {
             var sb = new StringBuilder();
             var oneToOnes = CodeAnalysisHelper.GetOneToOneProperties(entitySymbol).ToArray();
+            var oneToMany = CodeAnalysisHelper.GetOneToManyProperties(entitySymbol).ToArray();
             var properties = CodeAnalysisHelper.GetMappedProperties(entitySymbol).ToArray();
             var name = entitySymbol.Name;
             sb.Append($@"           private static void ValidateChildren(IEnumerable<{entitySymbol.FullName()}> entities, bool saveChildren)
@@ -25,7 +26,9 @@ namespace FirstOfficer.Generator.Syntax.Templates
                         a.Name == $"{oneToOne.Name}Id" &&
                         ((INamedTypeSymbol)a.Type).FullName() == typeof(long).FullName))
                 {
-                    sb.Append($@"if (entities.Any(a => a.{oneToOne.Type.Name} == null && a.{oneToOne.Type.Name}Id == 0))
+                    sb.Append($@"
+                            //one-to-one
+                            if (entities.Any(a => a.{oneToOne.Type.Name} == null && a.{oneToOne.Type.Name}Id == 0))
                             {{
                                 throw new FirstOfficer.Data.Exceptions.MissingEntityException(""{oneToOne.Type.Name} is required."");                             
                             }}");
@@ -33,11 +36,22 @@ namespace FirstOfficer.Generator.Syntax.Templates
 
                 sb.Append($@" if (saveChildren && entities.Any(a => ((a.{oneToOne.Type.Name}?.Id) ?? 0) != 0 && a.{oneToOne.Type.Name}Id != a.{oneToOne.Type.Name}!.Id))
                                 {{
-                                    throw new FirstOfficer.Data.Exceptions.ForeignIdMismatchException(""{entitySymbol.Name} {oneToOne.Type.Name}Id does not match {oneToOne.Type.Name} Id."");
+                                    throw new FirstOfficer.Data.Exceptions.ForeignIdMismatchException(""{name} {oneToOne.Type.Name}Id does not match {oneToOne.Type.Name} Id."");
+                                }}");
+            }
+            foreach (var many in oneToMany)
+            {
+                sb.Append($@"
+
+                                //one-to-many
+                                if (saveChildren && entities.All(b=> b.{new Pluralizer().Pluralize(((INamedTypeSymbol)many.Type).TypeArguments[0].Name)}.Any(c=> c.{name}Id != b.Id)))
+                                {{
+                                    throw new FirstOfficer.Data.Exceptions.ForeignIdMismatchException(""{name} Id does not match {new Pluralizer().Pluralize(((INamedTypeSymbol)many.Type).TypeArguments[0].Name)}.{name} Id."");
                                 }}");
             }
 
             sb.Append($@"     }} ");
+
 
             return sb.ToString();
         }

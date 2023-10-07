@@ -59,11 +59,14 @@ namespace FirstOfficer.Tests.Generator
             var books = GetBooks(bookCount);
 
             Stopwatch stopwatch = new Stopwatch();
-            var transaction = await DbConnection.BeginTransactionAsync();
-            stopwatch.Start();
-            await DbConnection!.SaveBooks(books, transaction);
-            stopwatch.Stop();
-            await transaction.CommitAsync();
+            await using (var transaction = await DbConnection.BeginTransactionAsync())
+            {
+                stopwatch.Start();
+                await DbConnection!.SaveBooks(books, transaction);
+                stopwatch.Stop();
+                await transaction.CommitAsync();
+            }
+
             TimeSpan timeTaken = stopwatch.Elapsed;
             Console.WriteLine($"Code Generated Time taken: {timeTaken.TotalMilliseconds}ms");
 
@@ -246,7 +249,7 @@ namespace FirstOfficer.Tests.Generator
             stopwatch.Stop();
             TimeSpan timeTaken = stopwatch.Elapsed;
             Console.WriteLine($"Code Generated Time taken: {timeTaken.TotalMilliseconds}ms");
-            
+
             stopwatch = new Stopwatch();
             stopwatch.Start();
             rtnBooks = (await DbConnection.QueryAsync<Book>(sql)).ToList();
@@ -285,7 +288,7 @@ namespace FirstOfficer.Tests.Generator
                     Title = string.Empty.RandomString(10),
                     Checksum = string.Empty.RandomString(10)
                 });
-                
+
             }
             return books;
         }

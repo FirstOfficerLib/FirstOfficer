@@ -120,17 +120,12 @@ namespace FirstOfficer.Tests
             //assert that the book was saved
             Assert.That(dataTable.Rows.Count, Is.EqualTo(1));
             //asset that all properties were saved
+            Assert.That(book.Title, Is.EqualTo(dataTable.Rows[0]["title"]));
+            Assert.That(book.Description, Is.EqualTo(dataTable.Rows[0]["description"]));
+            Assert.That(book.ISBN, Is.EqualTo(dataTable.Rows[0]["i_sb_n"]));
+            Assert.That(book.Published, Is.EqualTo(dataTable.Rows[0]["published"]));
 
-            Assert.That(dataTable.Rows[0]["title"], Is.EqualTo(book.Title));
 
-            //round the date time to the nearest second
-            var published = dataTable.Rows[0]["published"];
-            published = book.Published.AddTicks(-(book.Published.Ticks % TimeSpan.TicksPerSecond));
-
-            Assert.That(published,
-                Is.EqualTo(book.Published.AddTicks(-(book.Published.Ticks % TimeSpan.TicksPerSecond))));
-            Assert.That(dataTable.Rows[0]["i_sb_n"], Is.EqualTo(book.ISBN));
-            Assert.That(dataTable.Rows[0]["description"], Is.EqualTo(book.Description));
             command.Dispose();
         }
 
@@ -151,8 +146,10 @@ namespace FirstOfficer.Tests
             Assert.That(dataTable.Rows.Count, Is.EqualTo(1));
             //asset that all properties were saved
 
-            Assert.That(dataTable.Rows[0]["content"], Is.EqualTo(page.Content));
-            Assert.That(dataTable.Rows[0]["page_number"], Is.EqualTo(page.PageNumber));
+            Assert.That(page.BookId,Is.EqualTo(dataTable.Rows[0]["book_id"]));
+            Assert.That(page.Content,Is.EqualTo(dataTable.Rows[0]["content"]));
+            Assert.That(page.PageNumber,Is.EqualTo(dataTable.Rows[0]["page_number"]));
+
             command.Dispose();
         }
 
@@ -171,11 +168,43 @@ namespace FirstOfficer.Tests
             //assert that the author was saved
             Assert.That(dataTable.Rows.Count, Is.EqualTo(1));
             //asset that all properties were saved
-            Assert.That(dataTable.Rows[0]["name"], Is.EqualTo(author.Name));
-            Assert.That(dataTable.Rows[0]["email"], Is.EqualTo(author.Email));
-            Assert.That(dataTable.Rows[0]["website"], Is.EqualTo(author.Website));
-
+            Assert.That(author.Email, Is.EqualTo(dataTable.Rows[0]["email"]));
+            Assert.That(author.Name, Is.EqualTo(dataTable.Rows[0]["name"]));
+            Assert.That(author.Website, Is.EqualTo(dataTable.Rows[0]["website"]));
             command.Dispose();
+        }
+
+
+        protected Book GetBookWithPages()
+        {
+            var book = new Book()
+            {
+                Description = string.Empty.RandomString(100),
+                ISBN = string.Empty.RandomString(10),
+                Published = DateTime.Now,
+                Title = string.Empty.RandomString(10)
+            };
+
+            book.Pages.Add(
+                new Page()
+                {
+                    Content = string.Empty.RandomString(1000),
+                    PageNumber = 10
+                });
+            book.Pages.Add(
+                new Page()
+                {
+                    Content = string.Empty.RandomString(1000),
+                    PageNumber = 11
+                });
+            book.Pages.Add(
+                new Page()
+                {
+                    Content = string.Empty.RandomString(1000),
+                    PageNumber = 12
+                });
+
+            return book;
         }
     }
 }

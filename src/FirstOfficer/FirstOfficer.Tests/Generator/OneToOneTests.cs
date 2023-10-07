@@ -40,6 +40,7 @@ namespace FirstOfficer.Tests.Generator
 
             await AssertSave(book);
             await AssertSave(page);
+            await transaction.DisposeAsync();
 
         }
 
@@ -69,6 +70,7 @@ namespace FirstOfficer.Tests.Generator
             {
                 await transaction.RollbackAsync();
             }
+            await transaction.DisposeAsync();
         }
 
 
@@ -110,6 +112,7 @@ namespace FirstOfficer.Tests.Generator
 
             await AssertSave(page.Book);
             await AssertSave(page);
+            await transaction.DisposeAsync();
         }
 
         //insert page with book and mismatched book id
@@ -150,6 +153,7 @@ namespace FirstOfficer.Tests.Generator
             {
                 await transaction.RollbackAsync();
             }
+            await transaction.DisposeAsync();
         }
 
         //page with book and then save page without child book
@@ -180,6 +184,7 @@ namespace FirstOfficer.Tests.Generator
             await transaction.CommitAsync();
             await AssertSave(book);
             await AssertSave(page);
+            await transaction.DisposeAsync();
         }
 
         //insert page with book and then update page without child book
@@ -210,6 +215,7 @@ namespace FirstOfficer.Tests.Generator
             await DbConnection.SavePage(page, transaction, false);
             await transaction.CommitAsync();
             await AssertSave(page);
+            await transaction.DisposeAsync();
         }
 
     }

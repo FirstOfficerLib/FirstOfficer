@@ -18,8 +18,12 @@ namespace FirstOfficer.Generator.Syntax
             bodyBuilder.AppendLine(
                 $"public static async Task Save{new Pluralizer().Pluralize(entitySymbol.Name)}(this IDbConnection dbConnection, IEnumerable<{entitySymbol.FullName()}> entities, IDbTransaction transaction, bool saveChildren = false)");
             bodyBuilder.AppendLine("{");
+            
+            bodyBuilder.AppendLine(" if(saveChildren) ");
+            bodyBuilder.AppendLine("{");
             bodyBuilder.AppendLine("ValidateChildren(entities, saveChildren);");
-            bodyBuilder.AppendLine(" if(saveChildren) { await SaveChildren(dbConnection, entities, transaction); } ");
+            bodyBuilder.AppendLine("await SaveOneToOne(dbConnection, entities, transaction);");
+            bodyBuilder.AppendLine("}");
             bodyBuilder.AppendLine($"var insertEntities = new List<{entitySymbol.FullName()}>();");
             bodyBuilder.AppendLine($"var updateEntities = new List<{entitySymbol.FullName()}>();");
             bodyBuilder.AppendLine("foreach (var entity in entities)");
@@ -35,6 +39,8 @@ namespace FirstOfficer.Generator.Syntax
             bodyBuilder.AppendLine("}");
             bodyBuilder.AppendLine($"await Insert{entitySymbol.Name}(dbConnection, insertEntities, transaction);");
             bodyBuilder.AppendLine($"await Update{entitySymbol.Name}(dbConnection, updateEntities, transaction);");
+            bodyBuilder.AppendLine("await SaveOneToMany(dbConnection, insertEntities, transaction);");
+            bodyBuilder.AppendLine("await SaveOneToMany(dbConnection, updateEntities, transaction);");
             bodyBuilder.AppendLine("}");
             bodyBuilder.AppendLine();
 

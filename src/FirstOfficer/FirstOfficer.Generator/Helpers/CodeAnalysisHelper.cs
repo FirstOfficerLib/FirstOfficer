@@ -8,7 +8,7 @@ namespace FirstOfficer.Generator.Helpers
 {
     internal static class CodeAnalysisHelper
     {
-        internal static IEnumerable<IPropertySymbol> GetAllProperties(INamedTypeSymbol entitySymbol,
+        internal static IPropertySymbol[] GetAllProperties(INamedTypeSymbol entitySymbol,
             List<IPropertySymbol>? props = null!)
         {
             props ??= new List<IPropertySymbol>();
@@ -20,7 +20,7 @@ namespace FirstOfficer.Generator.Helpers
                 GetAllProperties(entitySymbol.BaseType, props);
             }
 
-            return props;
+            return props.ToArray();
         }
 
         internal static IPropertySymbol[] GetFlagProperties(INamedTypeSymbol entitySymbol)
@@ -46,7 +46,7 @@ namespace FirstOfficer.Generator.Helpers
 
         }
 
-        internal static IEnumerable<IPropertySymbol> GetMappedProperties(INamedTypeSymbol entitySymbol)
+        internal static List<IPropertySymbol> GetMappedProperties(INamedTypeSymbol entitySymbol)
         {
             var props = GetAllProperties(entitySymbol).Where(a =>
                 a.Name != "Id" &&
@@ -58,11 +58,11 @@ namespace FirstOfficer.Generator.Helpers
             return props;
         }
 
-        internal static IEnumerable<IPropertySymbol> GetOneToOneProperties(INamedTypeSymbol entitySymbol)
+        internal static IPropertySymbol[] GetOneToOneProperties(INamedTypeSymbol entitySymbol)
         {
             return GetAllProperties(entitySymbol).Where(a =>
                 a.Type is INamedTypeSymbol { IsGenericType: false } symbol &&
-                symbol.AllInterfaces.Any(b => b.Name == "IEntity")).ToList();
+                symbol.AllInterfaces.Any(b => b.Name == "IEntity")).ToArray();
         }
 
 
@@ -87,6 +87,20 @@ namespace FirstOfficer.Generator.Helpers
             }
 
             return false;
+        }
+
+        public static IPropertySymbol[] GetOneToManyProperties(INamedTypeSymbol entitySymbol)
+        {
+            return GetAllProperties(entitySymbol).Where(a =>
+                a.Type is INamedTypeSymbol symbol &&
+                IsCollection(symbol) &&
+                symbol.TypeArguments.All(b => b.AllInterfaces.Any(c => c.Name == "IEntity")))
+                .Where(a=>
+                    GetAllProperties(((a.Type as INamedTypeSymbol)?.TypeArguments[0] as INamedTypeSymbol)!)
+                        .Any(b=> b.Name == $"{entitySymbol.Name}Id")
+                )
+                .ToArray();
+
         }
     }
 }

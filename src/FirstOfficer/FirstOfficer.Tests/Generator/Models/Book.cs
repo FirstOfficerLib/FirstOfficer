@@ -24,6 +24,7 @@ namespace FirstOfficer.Tests.Generator.Models
         public DateTime Published { get; set; }
         [Column("i_sb_n")]
         [TextSize(50)]
+        [Queryable]
         public string? ISBN { get; set; }
         [Column("description")]
         public string? Description { get; set; }

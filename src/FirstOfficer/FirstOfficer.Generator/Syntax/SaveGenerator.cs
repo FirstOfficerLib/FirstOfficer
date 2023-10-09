@@ -39,8 +39,11 @@ namespace FirstOfficer.Generator.Syntax
             bodyBuilder.AppendLine("}");
             bodyBuilder.AppendLine($"await Insert{entitySymbol.Name}(dbConnection, insertEntities, transaction);");
             bodyBuilder.AppendLine($"await Update{entitySymbol.Name}(dbConnection, updateEntities, transaction);");
-            bodyBuilder.AppendLine("await SaveOneToMany(dbConnection, insertEntities, transaction);");
-            bodyBuilder.AppendLine("await SaveOneToMany(dbConnection, updateEntities, transaction);");
+            bodyBuilder.AppendLine(" if(saveChildren) ");
+            bodyBuilder.AppendLine("{");
+            bodyBuilder.AppendLine("await SaveOneToMany(dbConnection, entities, transaction);");
+            bodyBuilder.AppendLine("await SaveManyToMany(dbConnection, entities, transaction);");
+            bodyBuilder.AppendLine("}");
             bodyBuilder.AppendLine("}");
             bodyBuilder.AppendLine();
 

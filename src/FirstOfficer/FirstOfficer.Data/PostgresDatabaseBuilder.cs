@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
 using Npgsql;
+using Pluralize.NET;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace FirstOfficer.Data
@@ -67,8 +68,71 @@ namespace FirstOfficer.Data
                 AddForeignKey(entityType, entityTypes);
             }
 
+            AddManyToManyTables(entityTypes);
+
             _logger.LogInformation("PostgresDatabaseBuilder Finished");
         }
+
+        private void AddManyToManyTables(List<Type> entityTypes)
+        {
+            var manyToMany = GetManyToMany(entityTypes);
+
+            foreach (var props in manyToMany)
+            {
+                CreateManyTable(props.Key, DataHelper.GetIdColumnName(props.Value.Item1), DataHelper.GetIdColumnName(props.Value.Item2));
+                AddManyForeignKey(props.Value.Item1, props.Key);
+                AddManyForeignKey(props.Value.Item2, props.Key);
+            }
+        }
+
+
+        private void CreateManyTable(string tableName, string column1, string column2)
+        {
+            _logger.LogInformation($"Creating many to many table {tableName}");
+            var sql = $@"CREATE TABLE {tableName} (
+                    {column1} BIGINT NOT NULL,
+                    {column2} BIGINT NOT NULL,
+                    PRIMARY KEY ({column1}, {column2})
+                    );";
+            _connection.Execute(sql);
+        }
+
+        private Dictionary<string, (PropertyInfo, PropertyInfo)> GetManyToMany(List<Type> entityTypes)
+        {
+            var rtn = new Dictionary<string, (PropertyInfo, PropertyInfo)>();
+
+            foreach (var type1 in entityTypes)
+            {
+                foreach (var type2 in entityTypes)
+                {
+                    if (type1 == type2)
+                    {
+                        continue;
+                    }
+
+                    var props = type1.GetProperties().Where(a =>
+                        a.PropertyType.GenericTypeArguments.Any() && a.PropertyType.GenericTypeArguments[0] == type2).ToList();
+
+                    foreach (var prop1 in props)
+                    {
+                        var prop2 = type2.GetProperties().FirstOrDefault(a =>
+                            a.PropertyType.GenericTypeArguments.Any() && a.PropertyType.GenericTypeArguments[0] == type1);
+                        if (prop2 == null)
+                        {
+                            continue;
+                        }
+
+                        var name = DataHelper.GetManyToManyTableName(type1.Name, prop1.Name, type2.Name, prop2.Name);
+                        rtn.TryAdd(name, (prop1, prop2));
+                    }
+                }
+
+            }
+
+            return rtn;
+        }
+
+
 
         private string GetChecksum(List<Type> entityTypes)
         {
@@ -121,6 +185,17 @@ namespace FirstOfficer.Data
             return false;
         }
 
+        private void AddManyForeignKey(PropertyInfo propertyInfo, string tableName)
+        {
+            var entityType = propertyInfo.PropertyType.GenericTypeArguments[0];
+            var colName = DataHelper.GetIdColumnName(propertyInfo);
+            var fkTableName = DataHelper.GetTableName(entityType);
+            string fkName = $"fk_{tableName}_{fkTableName}_{colName}";
+
+            WriteFk(fkName, tableName, colName, fkTableName);
+
+        }
+        
         private void AddForeignKey(Type entityType, List<Type> entityTypes)
         {
             var tableName = DataHelper.GetTableName(entityType);
@@ -132,24 +207,29 @@ namespace FirstOfficer.Data
                 var fkTableName = DataHelper.GetTableName(entityTypes.First(a => a.Name == prop.Name.Substring(0, prop.Name.Length - 2)));
                 var colName = DataHelper.GetColumnName(prop);
                 string fkName = $"fk_{tableName}_{fkTableName}_{colName}";
-
-                var sql = $"SELECT conname AS constraint_name FROM pg_constraint WHERE conname = '{fkName}';";
-                using var command = _connection.CreateCommand();
-                command.CommandText = sql;
-
-                if (command.ExecuteScalar() != null)
-                {
-                    continue;
-                }
-
-                sql = $@"ALTER TABLE {tableName}
-                                ADD CONSTRAINT {fkName}
-                                FOREIGN KEY ({colName}) REFERENCES {fkTableName}(id);";
-                _connection.Execute(sql);
+                WriteFk(fkName, tableName, colName, fkTableName);
+          
             }
 
         }
 
+        private void WriteFk(string fkName, string tableName, string colName, string fkTableName)
+        {
+            var sql = $"SELECT conname AS constraint_name FROM pg_constraint WHERE conname = '{fkName}';";
+            using var command = _connection.CreateCommand();
+            command.CommandText = sql;
+
+            if (command.ExecuteScalar() != null)
+            {
+                return;
+            }
+
+            sql = $@"ALTER TABLE {tableName}
+                                ADD CONSTRAINT {fkName}
+                                FOREIGN KEY ({colName}) REFERENCES {fkTableName}(id);";
+            _connection.Execute(sql);
+        }
+        
         private void AddColumn(string tableName, PropertyInfo pi)
         {
 

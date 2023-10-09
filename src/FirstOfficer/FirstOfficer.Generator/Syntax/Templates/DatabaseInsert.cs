@@ -51,7 +51,7 @@ namespace FirstOfficer.Generator.Syntax.Templates
                                 ";
                 }
 
-                rtn += $@"command.Parameters.AddWithValue($""@{prop.Name}_{{i}}"", entity.{prop.Name});
+                rtn += $@"command.Parameters.AddWithValue($""@{prop.Name}_{{i}}"", entity.{prop.Name} {CodeAnalysisHelper.HandleWhenNull(prop)});
                                       ";
 
             }

@@ -5,12 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FirstOfficer.Data;
+using FirstOfficer.Generator.Extensions;
 using FirstOfficer.Tests.Generator.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Npgsql;
+using Pluralize.NET;
 
 namespace FirstOfficer.Tests
 {
@@ -57,7 +59,7 @@ namespace FirstOfficer.Tests
             if (DbConnection == null)
             {
                 throw new Exception("DbConnection is null");
-            }       
+            }
             DbConnection.Open();
 
             var tables = new List<string>();
@@ -146,9 +148,9 @@ namespace FirstOfficer.Tests
             Assert.That(dataTable.Rows.Count, Is.EqualTo(1));
             //asset that all properties were saved
 
-            Assert.That(page.BookId,Is.EqualTo(dataTable.Rows[0]["book_id"]));
-            Assert.That(page.Content,Is.EqualTo(dataTable.Rows[0]["content"]));
-            Assert.That(page.PageNumber,Is.EqualTo(dataTable.Rows[0]["page_number"]));
+            Assert.That(page.BookId, Is.EqualTo(dataTable.Rows[0]["book_id"]));
+            Assert.That(page.Content, Is.EqualTo(dataTable.Rows[0]["content"]));
+            Assert.That(page.PageNumber, Is.EqualTo(dataTable.Rows[0]["page_number"]));
 
             command.Dispose();
         }
@@ -172,6 +174,46 @@ namespace FirstOfficer.Tests
             Assert.That(author.Name, Is.EqualTo(dataTable.Rows[0]["name"]));
             Assert.That(author.Website, Is.EqualTo(dataTable.Rows[0]["website"]));
             command.Dispose();
+        }
+
+        protected void AssertManyToManySave<T1,T2>(List<T1> input1, List<T2> input2) where T1 : IEntity where T2 : IEntity
+        {
+            var type1Name = input1.GetType().GetGenericArguments()[0].Name;
+            var type2Name = input2.GetType().GetGenericArguments()[0].Name;
+            var prop1Name = new Pluralizer().Pluralize(type2Name);
+            var prop2Name = new Pluralizer().Pluralize(type1Name);
+            
+            //assert T2 count 
+            var sql = $"SELECT distinct author_id FROM {DataHelper.GetManyToManyTableName(type1Name, prop1Name, type2Name, prop2Name)}  WHERE {type1Name.ToSnakeCase()}_id in ({string.Join(",", input1.Select(a => a.Id))})";
+            var command = DbConnection.CreateCommand();
+            command.CommandText = sql;
+            using var reader = command.ExecuteReader();
+            var dataTable = new DataTable();
+            dataTable.Load(reader);
+            Assert.That(dataTable.Rows.Count, Is.EqualTo(input2.Count));
+
+            //Assert the T2 entities were saved
+            command.CommandText = "SELECT * FROM " + DataHelper.GetTableName<T2>() + " WHERE id in (" + string.Join(",", input2.Select(a => a.Id)) + ")";
+            using var reader2 = command.ExecuteReader();
+            var dataTable2 = new DataTable(); 
+            dataTable2.Load(reader2);
+            Assert.That(dataTable2.Rows.Count, Is.EqualTo(input2.Count));
+
+            //assert T1 count
+            sql = $"SELECT distinct book_id FROM {DataHelper.GetManyToManyTableName(type1Name, prop1Name, type2Name, prop2Name)}  WHERE {type2Name.ToSnakeCase()}_id in ({string.Join(",", input2.Select(a => a.Id))})";
+            command.CommandText = sql;
+            using var reader3 = command.ExecuteReader();
+            var dataTable3 = new DataTable();
+            dataTable3.Load(reader3);
+            Assert.That(dataTable3.Rows.Count, Is.EqualTo(input1.Count));
+
+            //Assert the T1 entities were saved
+            command.CommandText = "SELECT * FROM " + DataHelper.GetTableName<T1>() + " WHERE id in (" + string.Join(",", input1.Select(a => a.Id)) + ")";
+            using var reader4 = command.ExecuteReader();
+            var dataTable4 = new DataTable();
+            dataTable4.Load(reader4);
+            Assert.That(dataTable4.Rows.Count, Is.EqualTo(input1.Count));
+            
         }
 
 

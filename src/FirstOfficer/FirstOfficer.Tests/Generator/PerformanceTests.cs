@@ -19,7 +19,6 @@ namespace FirstOfficer.Tests.Generator
     {
         //test query books
         [Test]
-        [Ignore("")]
         public async Task Saving10000Test()
         {
             var bookCount = 10000;
@@ -262,7 +261,8 @@ namespace FirstOfficer.Tests.Generator
 
             stopwatch = new Stopwatch();
             stopwatch.Start();
-            rtnBooks = context.Books.ToList();
+            var query = context.Books.Where(a => true);
+            rtnBooks = query.ToList();
             stopwatch.Stop();
             timeTaken = stopwatch.Elapsed;
             Console.WriteLine($"EF Core taken: {timeTaken.TotalMilliseconds}ms");

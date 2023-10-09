@@ -2,7 +2,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
+using FirstOfficer.Generator.Extensions;
 
 namespace FirstOfficer.Generator.Helpers
 {
@@ -26,7 +28,7 @@ namespace FirstOfficer.Generator.Helpers
         internal static IPropertySymbol[] GetFlagProperties(INamedTypeSymbol entitySymbol)
         {
             return GetAllProperties(entitySymbol)
-                .Where(a => 
+                .Where(a =>
                         IsCollection(a.Type) ||
                         IsEntity(a.Type))
                 .OrderBy(a => a.Name)
@@ -89,18 +91,49 @@ namespace FirstOfficer.Generator.Helpers
             return false;
         }
 
-        public static IPropertySymbol[] GetOneToManyProperties(INamedTypeSymbol entitySymbol)
+        internal static IPropertySymbol[] GetOneToManyProperties(INamedTypeSymbol entitySymbol)
         {
             return GetAllProperties(entitySymbol).Where(a =>
                 a.Type is INamedTypeSymbol symbol &&
                 IsCollection(symbol) &&
                 symbol.TypeArguments.All(b => b.AllInterfaces.Any(c => c.Name == "IEntity")))
-                .Where(a=>
+                .Where(a =>
                     GetAllProperties(((a.Type as INamedTypeSymbol)?.TypeArguments[0] as INamedTypeSymbol)!)
-                        .Any(b=> b.Name == $"{entitySymbol.Name}Id")
+                        .Any(b => b.Name == $"{entitySymbol.Name}Id")
                 )
                 .ToArray();
 
         }
+
+        internal static IPropertySymbol[] GetManyToManyProperties(INamedTypeSymbol entitySymbol)
+        {
+            return GetAllProperties(entitySymbol).Where(a =>
+                    a.Type is INamedTypeSymbol symbol &&
+                    IsCollection(symbol) &&
+                    symbol.TypeArguments.Count() == 1 &&
+                    symbol.TypeArguments.All(b => b.AllInterfaces.Any(c => c.Name == "IEntity"))).Where(a =>
+                    GetAllProperties(((a.Type as INamedTypeSymbol)?.TypeArguments[0] as INamedTypeSymbol)!)  //get all properties of the collection type
+                        .Any(b => b.Type is       //make sure the property type is of entitySymbol type
+                             INamedTypeSymbol symbol &&
+                             IsCollection(symbol) &&
+                             symbol.TypeArguments.Count() == 1 &&
+                             symbol.TypeArguments.All(c => SymbolEqualityComparer.Default.Equals(c,entitySymbol))))
+                .ToArray();
+
+        }
+
+        internal static string HandleWhenNull(IPropertySymbol prop)
+        {
+            if (prop.Type.NullableAnnotation == NullableAnnotation.Annotated ||
+                prop.Type is INamedTypeSymbol { IsGenericType: true, OriginalDefinition.SpecialType: SpecialType.System_Nullable_T })
+            {
+                return "?? (object)DBNull.Value";
+
+            }
+
+            return string.Empty;
+        }
+
+    
     }
 }

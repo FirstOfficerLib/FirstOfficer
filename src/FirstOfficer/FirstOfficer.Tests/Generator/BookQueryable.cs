@@ -1,31 +1,44 @@
-﻿using System.Text;
+﻿using System.Data;
+using System.Data.Common;
+using System.Text;
+using FirstOfficer.Data.Query;
+using FirstOfficer.Data.Query.Contracts;
+using FirstOfficer.Data.Query.Npgsql;
+using FirstOfficer.Tests.Generator.Models;
 
 namespace FirstOfficer.Tests.Generator
 {
-    public class BookQueryable
+    public class BookQueryable : QueryBuilder
     {
+        private readonly DbConnection _dbConnection;
+        private readonly IDbTransaction _transaction;
+        private readonly IQueryBuilder _queryBuilder;
+
         protected readonly StringBuilder WhereBuilder = new();
-        
-        public BookQueryable WhereAreEqual(BookQueryBy queryBy, object value)
-        {
-            switch (queryBy)
-            {
-                case BookQueryBy.Id:
-                    WhereBuilder.Append($"id = {value}");
-                    break;
-                case BookQueryBy.Checksum:
-                    break;
-            }
 
-            return this;
+        public BookQueryable(DbConnection dbConnection, IDbTransaction transaction, IQueryBuilder queryBuilder)
+        {
+            _dbConnection = dbConnection;
+            _transaction = transaction;
+            _queryBuilder = queryBuilder;
+            throw new NotImplementedException();
         }
 
-        public enum BookQueryBy
+        public bool Where(Func<BookQueryable, bool> expression)
         {
-            Id,
-            Checksum
-            
+            throw new NotImplementedException();
         }
 
+        public override bool GetWhereQuery(string parameter, Operator op, object value, bool ignoreCase = true)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    
+
+    public static class DbConnectionExtensions
+    {
+        public static BookQueryable Books(this DbConnection dbConnection, IDbTransaction transaction) => new BookQueryable(dbConnection, transaction, new NpgsqlQueryBuilder());
     }
 }

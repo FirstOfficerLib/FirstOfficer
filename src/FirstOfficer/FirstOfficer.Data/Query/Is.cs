@@ -8,8 +8,8 @@ namespace FirstOfficer.Data.Query
 {
     public enum Operator
     {
-        AreEqual,
-        AreNotEqual,
+        AreEquals,
+        NotAreEquals,
         GreaterThan,
         GreaterThanOrEqual,
         LessThan,
@@ -20,8 +20,6 @@ namespace FirstOfficer.Data.Query
         IsNull,
         IsNotNull,
         In,
-        NotIn,
-        Between,
-        NotBetween
+        NotIn
     }
 }

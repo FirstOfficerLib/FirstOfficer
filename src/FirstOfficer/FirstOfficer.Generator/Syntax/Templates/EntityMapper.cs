@@ -2,6 +2,7 @@
 using FirstOfficer.Generator.Extensions;
 using FirstOfficer.Generator.Helpers;
 using Microsoft.CodeAnalysis;
+using Pluralize.NET;
 
 namespace FirstOfficer.Generator.Syntax.Templates
 {
@@ -28,14 +29,14 @@ namespace FirstOfficer.Generator.Syntax.Templates
                     var entity = new {entity.FullName()}();
                     {GetMapping(dbProps, tableName)}                       
 ");
-            foreach (var propertySymbol in oneToOne)
-            {
-                sb.Append($"if(reader[\"{DataHelper.GetTableName(propertySymbol.Name)}_id\"] != DBNull.Value)");
-                sb.AppendLine("{");
-                sb.AppendLine($"entity.{propertySymbol.Name} = new();");
-                sb.AppendLine("}");
-                sb.AppendLine(GetMapping(GetPropertySymbols((INamedTypeSymbol)propertySymbol.Type), DataHelper.GetTableName(propertySymbol.Name), propertySymbol.Name));
-            }
+            //foreach (var propertySymbol in oneToOne)
+            //{
+            //    sb.Append($"if(reader[\"{DataHelper.GetTableName(entityName)}_{propertySymbol.Name.ToSnakeCase()}_id\"] != DBNull.Value)");
+            //    sb.AppendLine("{");
+            //    sb.AppendLine($"entity.{propertySymbol.Name} = new();");
+            //    sb.AppendLine("}");
+            //    sb.AppendLine(GetMapping(GetPropertySymbols((INamedTypeSymbol)propertySymbol.Type), DataHelper.GetTableName(propertySymbol.Name), propertySymbol.Name));
+            //}
 
             sb.AppendLine($@"                
                  entities.Add(entity);

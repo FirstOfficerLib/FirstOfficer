@@ -66,8 +66,9 @@ namespace FirstOfficer.Tests.Generator
 
             await transaction.CommitAsync();
 
-            var allBooksCount = (await DbConnection.QueryBooks(EntityBook.Includes.None, null )).ToList();
+            var allBooksCount = (await DbConnection.QueryBooks(EntityBook.Includes.None, null)).ToList();
             Assert.That(0, Is.EqualTo(allBooksCount.Count));
+            await transaction.DisposeAsync();
         }
 
         [Test]
@@ -120,9 +121,10 @@ namespace FirstOfficer.Tests.Generator
 
             var allBooksCount = (await conn2.QueryBooks(EntityBook.Includes.None, null)).ToList();
             Assert.That(0, Is.EqualTo(allBooksCount.Count));
-
-            conn2.Close();
+            await transaction.DisposeAsync();
+            await conn2.CloseAsync();
             conn2.Dispose();
+
         }
 
 

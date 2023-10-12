@@ -1,14 +1,16 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using FirstOfficer.Core.Extensions;
 using FirstOfficer.Data.Attributes;
-using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
 using Npgsql;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using Pluralize.NET;
+
 
 namespace FirstOfficer.Data
 {
@@ -64,11 +66,81 @@ namespace FirstOfficer.Data
 
                     AddColumn(tableName, pi);
                 }
-                AddForeignKey(entityType, entityTypes);
+                
             }
+
+            AddForeignKeys(entityTypes);
+
+
+            AddManyToManyTables(entityTypes);
 
             _logger.LogInformation("PostgresDatabaseBuilder Finished");
         }
+
+        private void AddManyToManyTables(List<Type> entityTypes)
+        {
+            var manyToMany = GetManyToMany(entityTypes);
+
+            foreach (var props in manyToMany)
+            {
+                CreateManyTable(props.Key, DataHelper.GetIdColumnName(props.Value.Item1), DataHelper.GetIdColumnName(props.Value.Item2));
+                AddManyForeignKey(props.Value.Item1, props.Key);
+                AddManyForeignKey(props.Value.Item2, props.Key);
+            }
+        }
+
+
+        private void CreateManyTable(string tableName, string column1, string column2)
+        {
+            _logger.LogInformation($"Creating many to many table {tableName}");
+            var sql = $@"CREATE TABLE {tableName} (
+                    {column1} BIGINT NOT NULL,
+                    {column2} BIGINT NOT NULL,
+                    PRIMARY KEY ({column1}, {column2})
+                    );";
+            _connection.Execute(sql);
+        }
+
+        private Dictionary<string, (PropertyInfo, PropertyInfo)> GetManyToMany(List<Type> entityTypes)
+        {
+            var rtn = new Dictionary<string, (PropertyInfo, PropertyInfo)>();
+
+            foreach (var type1 in entityTypes)
+            {
+                foreach (var type2 in entityTypes)
+                {
+                    if (type1 == type2)
+                    {
+                        continue;
+                    }
+
+                    var props = type1.GetProperties().Where(a =>
+                        a.PropertyType.GenericTypeArguments.Any() && a.PropertyType.GenericTypeArguments[0] == type2).ToList();
+
+                    foreach (var prop1 in props)
+                    {
+                        var prop2 = type2.GetProperties().FirstOrDefault(a =>
+                            a.PropertyType.GenericTypeArguments.Any() && a.PropertyType.GenericTypeArguments[0] == type1);
+                        if (prop2 == null)
+                        {
+                            continue;
+                        }
+
+                        var name = DataHelper.GetManyToManyTableName(type1.Name, prop1.Name, type2.Name, prop2.Name);
+
+                        if (!rtn.ContainsKey(name))
+                        {
+                            rtn.Add(name, (prop1, prop2));
+                        }
+                    }
+                }
+
+            }
+
+            return rtn;
+        }
+
+
 
         private string GetChecksum(List<Type> entityTypes)
         {
@@ -98,48 +170,74 @@ namespace FirstOfficer.Data
 
         private bool CheckChecksum(List<Type> entityTypes)
         {
-            using var command = _connection.CreateCommand();
-            command.CommandText = @"SELECT count(1) FROM information_schema.columns WHERE table_schema = 'public' AND table_name = '_first_officer';";
-            var count = command.ExecuteScalar();
-            if (count != null && (long)count > 0)
+            using (var command = _connection.CreateCommand())
             {
-                var checksum = GetChecksum(entityTypes);
-
-                command.CommandText = "SELECT checksum FROM _first_officer;";
-
-                var dbChecksum = command.ExecuteScalar();
-                if (dbChecksum != null && checksum == dbChecksum.ToString())
+                command.CommandText =
+                    @"SELECT count(1) FROM information_schema.columns WHERE table_schema = 'public' AND table_name = '_first_officer';";
+                var count = command.ExecuteScalar();
+                if (count != null && (long)count > 0)
                 {
-                    return true;
+                    var checksum = GetChecksum(entityTypes);
+
+                    command.CommandText = "SELECT checksum FROM _first_officer;";
+
+                    var dbChecksum = command.ExecuteScalar();
+                    if (dbChecksum != null && checksum == dbChecksum.ToString())
+                    {
+                        return true;
+                    }
+
+                    return false;
                 }
 
+                command.CommandText = "CREATE TABLE _first_officer (checksum varchar(64));";
+                command.ExecuteNonQuery();
                 return false;
             }
-
-            command.CommandText = "CREATE TABLE _first_officer (checksum varchar(64));";
-            command.ExecuteNonQuery();
-            return false;
         }
 
-        private void AddForeignKey(Type entityType, List<Type> entityTypes)
+        private void AddManyForeignKey(PropertyInfo propertyInfo, string tableName)
         {
-            var tableName = DataHelper.GetTableName(entityType);
-            var allTables = entityTypes.Select(a => a.Name).ToList();
-            var props = entityType.GetProperties().ToList();
-            foreach (var prop in props.Where(p => p.Name.EndsWith("Id") && allTables.Contains(p.Name.Substring(0, p.Name.Length - 2))))
-            {
-                //add foreign key
-                var fkTableName = DataHelper.GetTableName(entityTypes.First(a => a.Name == prop.Name.Substring(0, prop.Name.Length - 2)));
-                var colName = DataHelper.GetColumnName(prop);
-                string fkName = $"fk_{tableName}_{fkTableName}_{colName}";
+            var entityType = propertyInfo.PropertyType.GenericTypeArguments[0];
+            var colName = DataHelper.GetIdColumnName(propertyInfo);
+            var fkTableName = DataHelper.GetTableName(entityType);
+            string fkName = $"fk_{tableName}_{fkTableName}_{colName}";
 
-                var sql = $"SELECT conname AS constraint_name FROM pg_constraint WHERE conname = '{fkName}';";
-                using var command = _connection.CreateCommand();
+            WriteFk(fkName, tableName, colName, fkTableName);
+
+        }
+        
+        private void AddForeignKeys(List<Type> entityTypes)
+        {
+            foreach (var entityType in entityTypes)
+            {
+                var tableName = DataHelper.GetTableName(entityType);
+                var allTables = entityTypes.Select(a => a.Name).ToList();
+                var props = entityType.GetProperties().ToList();
+                foreach (var prop in props.Where(p =>                             
+                             p.Name.EndsWith("Id") && allTables.Contains(p.Name.Substring(0, p.Name.Length - 2))))
+                {
+                    //add foreign key
+                    var fkTableName =
+                        DataHelper.GetTableName(entityTypes.First(a =>
+                            a.Name == prop.Name.Substring(0, prop.Name.Length - 2)));
+                    var colName = DataHelper.GetColumnName(prop);
+                    string fkName = $"fk_{tableName}_{fkTableName}_{colName}";
+                    WriteFk(fkName, tableName, colName, fkTableName);
+                }
+            }
+        }
+
+        private void WriteFk(string fkName, string tableName, string colName, string fkTableName)
+        {
+            var sql = $"SELECT conname AS constraint_name FROM pg_constraint WHERE conname = '{fkName}';";
+            using (var command = _connection.CreateCommand())
+            {
                 command.CommandText = sql;
 
                 if (command.ExecuteScalar() != null)
                 {
-                    continue;
+                    return;
                 }
 
                 sql = $@"ALTER TABLE {tableName}
@@ -147,9 +245,8 @@ namespace FirstOfficer.Data
                                 FOREIGN KEY ({colName}) REFERENCES {fkTableName}(id);";
                 _connection.Execute(sql);
             }
-
         }
-
+        
         private void AddColumn(string tableName, PropertyInfo pi)
         {
 
@@ -169,7 +266,7 @@ namespace FirstOfficer.Data
             _connection.Execute(sql);
         }
 
-        private void CreateTable(string? tableName)
+        private void CreateTable(string tableName)
         {
             _logger.LogInformation($"Creating table {tableName}");
             var sql = $"CREATE TABLE {tableName}(id BIGSERIAL PRIMARY KEY);";
@@ -181,33 +278,38 @@ namespace FirstOfficer.Data
         {
             var tableName = DataHelper.GetTableName(type);
 
-            using var command = _connection.CreateCommand();
-            command.CommandText = @"SELECT column_name AS Name, data_type AS DataType, character_maximum_length AS MaxLength, is_nullable AS IsNullable
+            using (var command = _connection.CreateCommand())
+            {
+                command.CommandText =
+                    @"SELECT column_name AS Name, data_type AS DataType, character_maximum_length AS MaxLength, is_nullable AS IsNullable
                       FROM information_schema.columns
                       WHERE table_schema = 'public' AND table_name = @TableName";
-            command.Parameters.Add(new NpgsqlParameter("@TableName", DbType.String) { Value = tableName });
+                command.Parameters.Add(new NpgsqlParameter("@TableName", DbType.String) { Value = tableName });
 
-            using var reader = command.ExecuteReader();
-            var columns = new List<ColumnInfo>();
-            while (reader.Read())
-            {
-                columns.Add(new ColumnInfo(
-                    reader.GetString(0),
-                    reader.GetString(1),
-                    reader.IsDBNull(2) ? null : (int?)reader.GetInt32(2),
-                    reader.GetString(3)
-                ));
+                using (var reader = command.ExecuteReader())
+                {
+                    var columns = new List<ColumnInfo>();
+                    while (reader.Read())
+                    {
+                        columns.Add(new ColumnInfo(
+                            reader.GetString(0),
+                            reader.GetString(1),
+                            reader.IsDBNull(2) ? null : (int?)reader.GetInt32(2),
+                            reader.GetString(3)
+                        ));
+                    }
+
+                    return columns;
+                }
             }
-
-            return columns;
         }
     }
     public class ColumnInfo
     {
-        public ColumnInfo(string? name,
-            string? dataType,
+        public ColumnInfo(string name,
+            string dataType,
             int? maxLength,
-            string? isNullable)
+            string isNullable)
 
         {
             Name = name;
@@ -217,10 +319,10 @@ namespace FirstOfficer.Data
         }
 
 
-        public string? Name { get; set; }
-        public string? DataType { get; set; }
+        public string Name { get; set; }
+        public string DataType { get; set; }
         public int? MaxLength { get; set; }
-        public string? IsNullable { get; set; }
+        public string IsNullable { get; set; }
 
 
     }

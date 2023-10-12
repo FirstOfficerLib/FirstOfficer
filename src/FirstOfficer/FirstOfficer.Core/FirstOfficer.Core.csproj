@@ -1,10 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <PackageProjectUrl>https://github.com/FirstOfficerLib/FirstOfficer</PackageProjectUrl>
     <RepositoryUrl>https://github.com/FirstOfficerLib/FirstOfficer</RepositoryUrl>
     <RepositoryType>git</RepositoryType>

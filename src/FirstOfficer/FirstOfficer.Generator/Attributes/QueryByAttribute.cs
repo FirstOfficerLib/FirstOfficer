@@ -13,7 +13,7 @@ namespace FirstOfficer.Generator.Attributes
 
         public string QueryName { get; private set; }
 
-        public string? GetQuery()
+        public string GetQuery()
         {
             return LambdaFunction?.Body.ToString();
         }

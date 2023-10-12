@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Dapper;
 using System.Data;
 using FirstOfficer.Data;
+using FirstOfficer.Data.Query;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
@@ -18,8 +19,8 @@ namespace FirstOfficer.Tests.Generator
     internal class PerformanceTests : FirstOfficerTest
     {
         //test query books
+        [Ignore("Performance Test")]
         [Test]
-        [Ignore("")]
         public async Task Saving10000Test()
         {
             var bookCount = 10000;
@@ -59,17 +60,20 @@ namespace FirstOfficer.Tests.Generator
             var books = GetBooks(bookCount);
 
             Stopwatch stopwatch = new Stopwatch();
-            var transaction = await DbConnection.BeginTransactionAsync();
-            stopwatch.Start();
-            await DbConnection!.SaveBooks(books, transaction);
-            stopwatch.Stop();
-            await transaction.CommitAsync();
+            await using (var transaction = await DbConnection.BeginTransactionAsync())
+            {
+                stopwatch.Start();
+                await DbConnection!.SaveBooks(books, transaction);
+                stopwatch.Stop();
+                await transaction.CommitAsync();
+            }
+
             TimeSpan timeTaken = stopwatch.Elapsed;
             Console.WriteLine($"Code Generated Time taken: {timeTaken.TotalMilliseconds}ms");
 
             Assert.That(books.Any(a => a.Id == 0), Is.False);
 
-            string insertQuery = @"INSERT INTO books(description, i_sb_n, published, title) 
+            string insertQuery = @"INSERT INTO books(description, isbn, published, title) 
                            VALUES (@Description, @ISBN, @Published, @Title) RETURNING id;";
 
             books = GetBooks(bookCount);
@@ -165,7 +169,7 @@ namespace FirstOfficer.Tests.Generator
 
             Assert.That(books.Any(a => a.Id == 0), Is.False);
 
-            string insertQuery = @"INSERT INTO books(description, i_sb_n,  published, title) 
+            string insertQuery = @"INSERT INTO books(description, isbn,  published, title) 
                            VALUES (@Description, @ISBN, @Published, @Title) RETURNING id;";
 
             books = GetBooks(bookCount);
@@ -242,7 +246,7 @@ namespace FirstOfficer.Tests.Generator
 
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            var rtnBooks = (await DbConnection.QueryBooks(EntityBook.Includes.None)).ToList();
+            var rtnBooks = (await DbConnection.QueryBooks(EntityBook.Includes.None )).ToList();
             stopwatch.Stop();
             TimeSpan timeTaken = stopwatch.Elapsed;
             Console.WriteLine($"Code Generated Time taken: {timeTaken.TotalMilliseconds}ms");
@@ -259,7 +263,8 @@ namespace FirstOfficer.Tests.Generator
 
             stopwatch = new Stopwatch();
             stopwatch.Start();
-            rtnBooks = context.Books.ToList();
+            var query = context.Books.Where(a => true);
+            rtnBooks = query.ToList();
             stopwatch.Stop();
             timeTaken = stopwatch.Elapsed;
             Console.WriteLine($"EF Core taken: {timeTaken.TotalMilliseconds}ms");
@@ -285,7 +290,7 @@ namespace FirstOfficer.Tests.Generator
                     Title = string.Empty.RandomString(10),
                     Checksum = string.Empty.RandomString(10)
                 });
-                
+
             }
             return books;
         }

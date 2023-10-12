@@ -45,6 +45,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.7.0" />
     <PackageReference Include="Pluralize.NET" Version="1.0.2" />
     <PackageReference Include="System.CodeDom" Version="7.0.0" />
+    <PackageReference Include="System.Text.Json" Version="7.0.0" />
   </ItemGroup>
 
 
@@ -55,6 +56,9 @@
   <!-- This ensures the library will be packaged as a source generator when we use `dotnet pack` -->
   <ItemGroup>
     <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FirstOfficer.Data\FirstOfficer.Data.csproj" />
   </ItemGroup>
 
 </Project>

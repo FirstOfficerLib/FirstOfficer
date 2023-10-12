@@ -14,6 +14,11 @@ namespace FirstOfficer.Generator.Extensions
             return typeSymbol.ToDisplayString(format);  //maybe add "global::" to the beginning
         }
 
+        internal static string Namespace(this INamedTypeSymbol typeSymbol)
+        {
+            return typeSymbol.ContainingNamespace.ToDisplayString();
+        }
+
 
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace FirstOfficer.Data.Attributes
+﻿using System;
+
+namespace FirstOfficer.Data.Attributes
 {
 
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]

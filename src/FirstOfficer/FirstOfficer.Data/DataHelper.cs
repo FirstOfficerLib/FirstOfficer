@@ -1,4 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using System.Reflection;
 using FirstOfficer.Core.Extensions;
 using Pluralize.NET;
@@ -25,6 +28,11 @@ namespace FirstOfficer.Data
             return rtn;
         }
 
+        public static string GetIdColumnName(PropertyInfo propertyInfo)
+        {
+            return $"{new Pluralizer().Singularize(propertyInfo.Name)}Id".ToSnakeCase();
+        }
+
         public static string GetTableName<T>()
         {
             return GetTableName(typeof(T));
@@ -45,6 +53,18 @@ namespace FirstOfficer.Data
 
             return string.Join("_", namePieces);
         }
+
+
+        public static string GetManyToManyTableName(string type1Name, string prop1Name, string type2Name, string prop2Name)
+        {
+            var names = new List<string>() { $"{type1Name.ToSnakeCase()}_{prop1Name.ToSnakeCase()}", $"{type2Name.ToSnakeCase()}_{prop2Name.ToSnakeCase()}" }
+                .OrderBy(a => a)
+                .ToArray();
+
+            var name = $"many_to_many_{names.First()}__{names.Last()}";
+            return name;
+        }
+
         public static string GetDbType(PropertyInfo pi, int size = 255)
         {
             if (pi.PropertyType.FullName == typeof(DateTime).FullName)
@@ -73,14 +93,9 @@ namespace FirstOfficer.Data
                 return "decimal(38,15) NULL ";
             if (size == 0)
                 return "TEXT NULL ";
-            return IsNullableProperty(pi) ? $"VARCHAR({size}) NULL " : $"VARCHAR({size}) NOT NULL DEFAULT('') ";
+            return $"VARCHAR({size}) NULL ";
         }
 
-
-        private static bool IsNullableProperty(PropertyInfo p)
-        {
-            return new NullabilityInfoContext().Create(p).WriteState is NullabilityState.Nullable;
-        }
 
         public static string GetColumnName(PropertyInfo propertyInfo)
         {
@@ -88,5 +103,6 @@ namespace FirstOfficer.Data
             return columnName;
 
         }
+
     }
 }

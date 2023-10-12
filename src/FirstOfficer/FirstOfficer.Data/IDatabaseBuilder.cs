@@ -1,4 +1,6 @@
-﻿namespace FirstOfficer.Data
+﻿using System;
+
+namespace FirstOfficer.Data
 {
     public interface IDatabaseBuilder : IDisposable
     {

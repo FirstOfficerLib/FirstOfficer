@@ -8,6 +8,7 @@ namespace FirstOfficer.Data
     {
         [Column("id")]
         [Key]
+        [Queryable]
         public long Id { get; set; }
 
         [TextSize(64)]

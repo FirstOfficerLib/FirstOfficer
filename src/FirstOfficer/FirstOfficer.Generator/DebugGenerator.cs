@@ -46,7 +46,7 @@ namespace FirstOfficer.Generator
             "RS1035:Do not use APIs banned for analyzers",
             Justification = "Only used here to launch the debugger correctly and not in included the release build"
         )]
-        private static string FindSolutionFile([CallerFilePath] string? callerFile = null)
+        private static string FindSolutionFile([CallerFilePath] string callerFile = null)
         {
             var dir = Path.GetDirectoryName(callerFile) ??
                       throw new InvalidOperationException("could not resolve solution directory");

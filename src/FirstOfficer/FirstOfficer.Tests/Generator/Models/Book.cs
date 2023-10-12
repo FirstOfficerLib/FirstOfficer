@@ -15,21 +15,26 @@ namespace FirstOfficer.Tests.Generator.Models
     {
         [Column("title")]   //for benchmarking for EF Core
         [Queryable]
-        public string? Title { get; set; }
+        public string Title { get; set; }
         [Column("page_count")] //for benchmarking for EF Core
         //page count
         public int PageCount => Pages.Count();
-
+        [Queryable]
         [Column("published")]
         public DateTime Published { get; set; }
-        [Column("i_sb_n")]
+        [Column("isbn")]
         [TextSize(50)]
         [Queryable]
-        public string? ISBN { get; set; }
+        public string ISBN { get; set; }
         [Column("description")]
-        public string? Description { get; set; }
+        public string Description { get; set; }
         [Column("price")]
         public decimal Price { get; set; }
+        [Column("book_cover_id")]
+        public long? BookCoverId { get; set; }
+
+        //one to one
+        public BookCover? BookCover { get; set; }
         //one to many
         public ICollection<Page> Pages { get; set; } = new Collection<Page>();
         //many to many

@@ -1,4 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using System.Reflection;
 using FirstOfficer.Core.Extensions;
 using Pluralize.NET;
@@ -90,14 +93,9 @@ namespace FirstOfficer.Data
                 return "decimal(38,15) NULL ";
             if (size == 0)
                 return "TEXT NULL ";
-            return IsNullableProperty(pi) ? $"VARCHAR({size}) NULL " : $"VARCHAR({size}) NOT NULL DEFAULT('') ";
+            return $"VARCHAR({size}) NULL ";
         }
 
-
-        private static bool IsNullableProperty(PropertyInfo p)
-        {
-            return new NullabilityInfoContext().Create(p).WriteState is NullabilityState.Nullable;
-        }
 
         public static string GetColumnName(PropertyInfo propertyInfo)
         {

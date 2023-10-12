@@ -66,7 +66,7 @@ namespace FirstOfficer.Tests.Generator
 
             await transaction.CommitAsync();
 
-            var allBooksCount = (await DbConnection.QueryBooks(EntityBook.Includes.None, null )).ToList();
+            var allBooksCount = (await DbConnection.QueryBooks(EntityBook.Includes.None, null)).ToList();
             Assert.That(0, Is.EqualTo(allBooksCount.Count));
             await transaction.DisposeAsync();
         }

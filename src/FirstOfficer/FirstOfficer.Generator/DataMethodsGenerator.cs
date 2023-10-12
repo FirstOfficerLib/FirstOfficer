@@ -1,11 +1,9 @@
 ﻿using System.CodeDom;
 using System.CodeDom.Compiler;
-using System.Diagnostics;
-using System.Globalization;
+using System.Collections.Immutable;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using FirstOfficer.Generator.Attributes;
-using FirstOfficer.Generator.Extensions;
+using System.Runtime.Serialization;
+using System.Xml.Linq;
 using FirstOfficer.Generator.Helpers;
 using FirstOfficer.Generator.StateManagement;
 using FirstOfficer.Generator.Syntax;
@@ -13,7 +11,6 @@ using FirstOfficer.Generator.Syntax.Templates;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CSharp;
 
 namespace FirstOfficer.Generator
@@ -27,55 +24,45 @@ namespace FirstOfficer.Generator
 #if DEBUG
              //   DebugGenerator.AttachDebugger();
 #endif
-
-            //context.RegisterPostInitializationOutput(PostInitializationCallBack);
-
-            var entitiesProvider = context.CompilationProvider.Select(SelectEntities<INamedTypeSymbol>);
+            var entitiesProvider =
+                context.SyntaxProvider.CreateSyntaxProvider(
+                     IsClass,
+                    (syntaxContext, _) => (ClassDeclarationSyntax)syntaxContext.Node )
+                    .Where(a=> a is not null);
             
-            context.RegisterSourceOutput(entitiesProvider,
+            var compilation = context.CompilationProvider.Combine(entitiesProvider.Collect());
+            
+            context.RegisterSourceOutput(compilation,
                 static (spc, source) =>
-                CreateSource(spc, source.Item2, source.Item1.ToList()));
+                CreateSource(spc, source.Left, source.Right));
         }
 
-
-        private (IEnumerable<TResult>, Compilation) SelectEntities<TResult>(Compilation comp, CancellationToken cancellationToken) where TResult : INamedTypeSymbol
+        private bool IsClass(SyntaxNode node, CancellationToken token)
         {
-            var rtn = new List<TResult>();
+            return node is ClassDeclarationSyntax;
+        }
 
-            var loadedEntityHashes = StateManager.LoadState(comp);
-            var currentEntityHashes = StateManager.CurrentState(comp);
+        private static bool ContainsInterface(
+            Compilation comp,
+            ClassDeclarationSyntax node, string interfaceName)
+        {
+            var tree = node.SyntaxTree;
+            var root = tree.GetRoot();
+            var sModel = comp.GetSemanticModel(node.SyntaxTree);
+            var classSymbol = sModel.GetDeclaredSymbol(root.DescendantNodes().OfType<ClassDeclarationSyntax>().First());
 
-            foreach (var compSyntaxTree in comp.SyntaxTrees)
+            return classSymbol!.AllInterfaces.Any(a=> a.Name == interfaceName);
+        }
+
+        private static void CreateSource(SourceProductionContext context, Compilation comp, ImmutableArray<ClassDeclarationSyntax> entitiesDeclarations)
+        {
+            foreach (var entityDeclarationSyntax in entitiesDeclarations)
             {
-                var root = compSyntaxTree.GetRoot();
-                var sModel = comp.GetSemanticModel(compSyntaxTree);
-
-                var classDeclarationSyntax = root.DescendantNodes().OfType<ClassDeclarationSyntax>().FirstOrDefault();
-
-                if (classDeclarationSyntax is null || classDeclarationSyntax.SyntaxTree.FilePath.EndsWith(".g.cs"))
+                var entitiesDeclaration = comp.GetSemanticModel(entityDeclarationSyntax.SyntaxTree).GetDeclaredSymbol(entityDeclarationSyntax);
+                if (entitiesDeclaration == null || !ContainsInterface(comp, entityDeclarationSyntax,"IEntity"))
                 {
                     continue;
                 }
-
-                var classSymbol = sModel.GetDeclaredSymbol(classDeclarationSyntax);
-                
-                var key = $"IEntity-{classSymbol.FullName()}";
-                if (classSymbol is { IsAbstract: false } && classSymbol.AllInterfaces.ToArray().Any(a => a.Name == "IEntity")
-                    // &&  (!loadedEntityHashes.ContainsKey(key) || loadedEntityHashes[key] != currentEntityHashes[key])
-                   )
-                {
-                    rtn.Add((TResult)classSymbol);
-                }
-            }
-            return (rtn, comp);
-        }
-
-        private static void CreateSource(SourceProductionContext context, Compilation comp, List<INamedTypeSymbol> entitiesDeclarations)
-        {
-            
-
-            foreach (var entitiesDeclaration in entitiesDeclarations)
-            {
                 var className = entitiesDeclaration.Name;
                 var codeCompileUnit = GetCodeCompileUnit(context, comp, className);
                 var codeTypeDeclaration = codeCompileUnit.Namespaces[0].Types[0];
@@ -146,11 +133,6 @@ namespace FirstOfficer.Generator
             return codeCompileUnit;
         }
 
-
-        private static void PostInitializationCallBack(IncrementalGeneratorPostInitializationContext context)
-        {
-            //empty;
-        }
   
     }
 }

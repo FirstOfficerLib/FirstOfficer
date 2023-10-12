@@ -1,4 +1,6 @@
-﻿namespace FirstOfficer.Core.Extensions
+﻿using System;
+
+namespace FirstOfficer.Core.Extensions
 {
     public static class DateTimeExtensions
     {

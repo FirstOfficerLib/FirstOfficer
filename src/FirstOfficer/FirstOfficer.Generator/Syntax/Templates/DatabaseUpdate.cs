@@ -72,7 +72,7 @@ namespace FirstOfficer.Generator.Syntax.Templates
                 }
 
 
-                return rtn + $@"command.Parameters.AddWithValue($""{prop.Name}_{{i}}"", entity.{prop.Name} {CodeAnalysisHelper.HandleWhenNull(prop)});";
+                return rtn + $@"command.Parameters.AddWithValue($""{prop.Name}_{{i}}"", {CodeAnalysisHelper.HandleWhenNull(prop)});";
             }))}
                         command.Parameters.AddWithValue($""Checksum_{{i}}"", entity.Checksum());
                         command.Parameters.AddWithValue($""Id_{{i}}"", entity.Id);

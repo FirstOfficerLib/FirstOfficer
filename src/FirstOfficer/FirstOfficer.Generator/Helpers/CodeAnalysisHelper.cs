@@ -25,6 +25,12 @@ namespace FirstOfficer.Generator.Helpers
             return props.ToArray();
         }
 
+        internal static IPropertySymbol[] GetQueryableProperties(INamedTypeSymbol entitySymbol)
+        {
+            return GetAllProperties(entitySymbol)
+                .Where(a => a.GetAttributes().Any(b => b.AttributeClass?.Name == "QueryableAttribute")).ToArray();
+        }
+
         internal static IPropertySymbol[] GetFlagProperties(INamedTypeSymbol entitySymbol)
         {
             return GetAllProperties(entitySymbol)
@@ -117,7 +123,7 @@ namespace FirstOfficer.Generator.Helpers
                              INamedTypeSymbol symbol &&
                              IsCollection(symbol) &&
                              symbol.TypeArguments.Count() == 1 &&
-                             symbol.TypeArguments.All(c => SymbolEqualityComparer.Default.Equals(c,entitySymbol))))
+                             symbol.TypeArguments.All(c => SymbolEqualityComparer.Default.Equals(c, entitySymbol))))
                 .ToArray();
 
         }
@@ -125,15 +131,29 @@ namespace FirstOfficer.Generator.Helpers
         internal static string HandleWhenNull(IPropertySymbol prop)
         {
             if (prop.Type.NullableAnnotation == NullableAnnotation.Annotated ||
+                prop.Type.Name.ToLower() == "string" ||
                 prop.Type is INamedTypeSymbol { IsGenericType: true, OriginalDefinition.SpecialType: SpecialType.System_Nullable_T })
             {
-                return "?? (object)DBNull.Value";
+                if (prop.Type.Name.ToLower() == "nullable" &&
+                    !((INamedTypeSymbol)prop.Type).TypeArguments.IsDefaultOrEmpty &&
+                    ((INamedTypeSymbol)prop.Type).TypeArguments[0].Name.ToLower() == "int64")
+                {
+                    return $" NpgsqlTypes.NpgsqlDbType.Bigint , entity.{prop.Name} ?? (object)DBNull.Value";
+                }
+                if (prop.Type.Name.ToLower() == "nullable" &&
+                    !((INamedTypeSymbol)prop.Type).TypeArguments.IsDefaultOrEmpty &&
+                    ((INamedTypeSymbol)prop.Type).TypeArguments[0].Name.ToLower() == "int32")
+                {
+                    return $" NpgsqlTypes.NpgsqlDbType.Integer , entity.{prop.Name} ?? (object)DBNull.Value";
+                }
+
+                return $" entity.{prop.Name} ?? (object)DBNull.Value";
 
             }
 
-            return string.Empty;
+            return $" entity.{prop.Name} ";
         }
 
-    
+
     }
 }

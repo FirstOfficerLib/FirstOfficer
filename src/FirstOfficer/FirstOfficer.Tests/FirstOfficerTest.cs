@@ -21,7 +21,7 @@ namespace FirstOfficer.Tests
     {
         protected readonly NpgsqlConnection DbConnection = null!;
         protected IServiceProvider? ServiceProvider { get; private set; }
-        protected string? ConnectionString { get; private set; }
+        protected string ConnectionString { get; private set; }
 
         protected FirstOfficerTest()
         {
@@ -80,7 +80,7 @@ namespace FirstOfficer.Tests
 
                 foreach (var table in tables)
                 {
-                    sql = $"DROP TABLE {table};";
+                    sql = $"DROP TABLE {table} CASCADE;";
                     command.CommandText = sql;
                     try
                     {
@@ -124,7 +124,7 @@ namespace FirstOfficer.Tests
             //asset that all properties were saved
             Assert.That(book.Title, Is.EqualTo(dataTable.Rows[0]["title"]));
             Assert.That(book.Description, Is.EqualTo(dataTable.Rows[0]["description"]));
-            Assert.That(book.ISBN, Is.EqualTo(dataTable.Rows[0]["i_sb_n"]));
+            Assert.That(book.ISBN, Is.EqualTo(dataTable.Rows[0]["isbn"]));
             Assert.That(book.Published, Is.EqualTo(dataTable.Rows[0]["published"]));
 
 

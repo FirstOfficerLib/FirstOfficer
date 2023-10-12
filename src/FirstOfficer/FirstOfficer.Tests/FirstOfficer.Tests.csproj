@@ -51,6 +51,7 @@
 
   <ItemGroup>
     <Folder Include="Generated\FirstOfficer.Generator\FirstOfficer.Generator.DataMethodsGenerator\" />
+    <Folder Include="Generated\FirstOfficer.Generator\FirstOfficer.Generator.QueryMethodsGenerator\" />
   </ItemGroup>
 
 </Project>

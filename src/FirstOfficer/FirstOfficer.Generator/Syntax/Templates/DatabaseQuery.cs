@@ -19,24 +19,77 @@ namespace FirstOfficer.Generator.Syntax.Templates
 
             var name = symbol.Name;
             sb.Append($@"
-             public static async Task<IEnumerable<{symbol.FullName()}>> Query{new Pluralizer().Pluralize(name)}(this IDbConnection dbConnection, Includes includes,  System.Linq.Expressions.Expression<Func<{symbol.Name}Queryable, bool>> expression = null)
+             public static async Task<IEnumerable<{symbol.FullName()}>> Query{new Pluralizer().Pluralize(name)}(this IDbConnection dbConnection, Includes includes, 
+                    System.Linq.Expressions.Expression<Func<{symbol.Name}Queryable, bool>> expression = null,
+                    FirstOfficer.Data.Query.ParameterValues values = null)
              {{
-                var db = dbConnection as NpgsqlConnection;
-                await using (var command = db.CreateCommand())
-                {{
-                    command.CommandText = GetSql(includes, expression);
-                    await using(var reader = await command.ExecuteReaderAsync())
-                    {{
-                        return await {symbol.Name}Mapper(reader);
-                    }}
-                }}
+            var sql = GetSql(includes, expression);
+
+            using var command = new NpgsqlCommand(sql, dbConnection as NpgsqlConnection);
+            
+            if(values is not null)
+            {{
+
+            if (values.Value1 != null)
+            {{
+                command.Parameters.AddWithValue(""@value1"", values.Value1);
+            }}
+
+            if (values.Value2 != null)
+            {{
+                command.Parameters.AddWithValue(""@value2"", values.Value2);
+            }}
+
+            if (values.Value3 != null)
+            {{
+                command.Parameters.AddWithValue(""@value3"", values.Value3);
+            }}
+
+            if (values.Value4 != null)
+            {{
+                command.Parameters.AddWithValue(""@value4"", values.Value4);
+            }}
+
+            if (values.Value5 != null)
+            {{
+                command.Parameters.AddWithValue(""@value5"", values.Value5);
+            }}
+
+            if (values.Value6 != null)
+            {{
+                command.Parameters.AddWithValue(""@value6"", values.Value6);
+            }}
+
+            if (values.Value7 != null)
+            {{
+                command.Parameters.AddWithValue(""@value7"", values.Value7);
+            }}
+
+            if (values.Value8 != null)
+            {{
+                command.Parameters.AddWithValue(""@value8"", values.Value8);
+            }}
+
+            if (values.Value9 != null)
+            {{
+                command.Parameters.AddWithValue(""@value9"", values.Value9);
+            }}
+
+            if (values.Value10 != null)
+            {{
+                command.Parameters.AddWithValue(""@value10"", values.Value10);
+            }}
+            }}
+
+            using var reader = await command.ExecuteReaderAsync();
+            return await {symbol.Name}Mapper(reader);
              }}
 
   
              private static string GetSql(Includes includes, System.Linq.Expressions.Expression<Func<{symbol.Name}Queryable, bool>> expression)               
              {{
                 var joins = string.Empty;
-                var whereClause = GetWhereClause(expression);
+               
                 var cols = new List<string>() {{ {string.Join(", ", columnProperties.Select(a => $@"""{a}"""))} }};
 ");
 
@@ -60,7 +113,19 @@ namespace FirstOfficer.Generator.Syntax.Templates
                 sb.AppendLine("}");
             }
 
-            sb.AppendLine($@"var sql = $""SELECT {{string.Join("", "", cols) }} FROM {DataHelper.GetTableName(name)} {{joins}} ;"";");
+            sb.AppendLine($@"           
+            var whereClause = string.Empty;
+            if (expression != null)
+            {{
+                var whereKey = FirstOfficer.Data.Query.Helper.GetExpressionKey($""Query{new Pluralizer().Pluralize(name)}-{{expression.ToString()}}"");
+
+                if (!new FirstOfficer.Data.Query.SqlParts().WhereClauses.TryGetValue(whereKey, out whereClause))
+                {{
+                    throw new ApplicationException(""Where clause not found"");
+                }}
+            }} ");
+
+            sb.AppendLine($@"var sql = $""SELECT {{string.Join("", "", cols) }} FROM {DataHelper.GetTableName(name)} {{joins}} {{whereClause}};"";");
             sb.AppendLine("return sql;");
 
             sb.AppendLine("}");

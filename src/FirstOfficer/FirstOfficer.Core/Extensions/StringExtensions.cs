@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace FirstOfficer.Core.Extensions
@@ -10,9 +11,8 @@ namespace FirstOfficer.Core.Extensions
             if (string.IsNullOrEmpty(str)) return str;
 
             // Convert PascalCase to snake_case
-            str = Regex.Replace(str, @"(\w)([A-Z])", "$1_$2");
-
-            return str.ToLower();
+            string result = Regex.Replace(str, @"(?<=[a-z])([A-Z])", "_$1");
+            return result.ToLower();
         }
 
         public static string ToPascalCase(this string str)

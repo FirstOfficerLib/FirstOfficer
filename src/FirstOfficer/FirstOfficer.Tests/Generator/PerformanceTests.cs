@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Dapper;
 using System.Data;
 using FirstOfficer.Data;
+using FirstOfficer.Data.Query;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
@@ -18,6 +19,7 @@ namespace FirstOfficer.Tests.Generator
     internal class PerformanceTests : FirstOfficerTest
     {
         //test query books
+        [Ignore("Performance Test")]
         [Test]
         public async Task Saving10000Test()
         {
@@ -71,7 +73,7 @@ namespace FirstOfficer.Tests.Generator
 
             Assert.That(books.Any(a => a.Id == 0), Is.False);
 
-            string insertQuery = @"INSERT INTO books(description, i_sb_n, published, title) 
+            string insertQuery = @"INSERT INTO books(description, isbn, published, title) 
                            VALUES (@Description, @ISBN, @Published, @Title) RETURNING id;";
 
             books = GetBooks(bookCount);
@@ -167,7 +169,7 @@ namespace FirstOfficer.Tests.Generator
 
             Assert.That(books.Any(a => a.Id == 0), Is.False);
 
-            string insertQuery = @"INSERT INTO books(description, i_sb_n,  published, title) 
+            string insertQuery = @"INSERT INTO books(description, isbn,  published, title) 
                            VALUES (@Description, @ISBN, @Published, @Title) RETURNING id;";
 
             books = GetBooks(bookCount);
@@ -244,11 +246,11 @@ namespace FirstOfficer.Tests.Generator
 
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            var rtnBooks = (await DbConnection.QueryBooks(EntityBook.Includes.None)).ToList();
+            var rtnBooks = (await DbConnection.QueryBooks(EntityBook.Includes.None )).ToList();
             stopwatch.Stop();
             TimeSpan timeTaken = stopwatch.Elapsed;
             Console.WriteLine($"Code Generated Time taken: {timeTaken.TotalMilliseconds}ms");
-
+            
             stopwatch = new Stopwatch();
             stopwatch.Start();
             rtnBooks = (await DbConnection.QueryAsync<Book>(sql)).ToList();

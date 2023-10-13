@@ -48,3 +48,5 @@ Thumbs.db
 **/obj/**
 **/Generated/**
 *.user
+*.local.json
+*.Development.json

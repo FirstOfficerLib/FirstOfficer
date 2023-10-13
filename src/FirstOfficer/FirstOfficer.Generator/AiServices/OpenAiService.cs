@@ -5,14 +5,25 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Configuration;
 
 namespace FirstOfficer.Generator.AiServices
 {
     internal class OpenAiService : IAiService
     {
+        
+        private readonly string _key = string.Empty ;
+        private readonly string _orgId = string.Empty;
+
+        public OpenAiService(IConfiguration configuration)
+        {
+            _key = configuration["FirstOfficer:OpenAi:Key"] ?? string.Empty;
+            _orgId = configuration["FirstOfficer:OpenAi:OrgId"] ?? string.Empty;
+            
+        }
+
         public async Task<string> GetSqlFromExpression(string expression)
         {
-
             string responsePayLoad;
             var rootObject = new Root();
             do
@@ -22,9 +33,9 @@ namespace FirstOfficer.Generator.AiServices
                 var content = new StringContent(payLoad, Encoding.UTF8, "application/json");
                 var request =
                     new HttpRequestMessage(HttpMethod.Post, "https://api.openai.com/v1/chat/completions");
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", key);
-                request.Headers.Add("OpenAI-Organization", orgId);
-                //request.Headers.Add("User-Agent", "FirstOfficer/0.0.1");
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _key);
+                request.Headers.Add("OpenAI-Organization", _orgId);
+                request.Headers.Add("User-Agent", "FirstOfficer/0.0.0.1");
                 request.Content = content;
                 var response = await httpClient.SendAsync(request);
 
@@ -65,7 +76,7 @@ namespace FirstOfficer.Generator.AiServices
                     ";
 
         }
-        
+
         public class Root
         {
             [JsonPropertyName("id")]
@@ -119,109 +130,6 @@ namespace FirstOfficer.Generator.AiServices
             [JsonPropertyName("total_tokens")]
             public int TotalTokens { get; set; }
         }
-
-
-
-
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-
-    //
-
-
-
-
-
-
-
-
-    //
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    private string key = "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";
-        private string orgId = "org-xJKGxz3TSdMxJLV8CELnKw2n";
-
 
 
     }

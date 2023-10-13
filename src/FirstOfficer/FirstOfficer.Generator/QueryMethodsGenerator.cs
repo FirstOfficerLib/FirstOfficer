@@ -2,6 +2,7 @@
 using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Globalization;
+using System.Net.Mime;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -9,6 +10,7 @@ using FirstOfficer.Generator.AiServices;
 using FirstOfficer.Generator.Attributes;
 using FirstOfficer.Generator.Extensions;
 using FirstOfficer.Generator.Helpers;
+using FirstOfficer.Generator.Services;
 using FirstOfficer.Generator.StateManagement;
 using FirstOfficer.Generator.Syntax;
 using FirstOfficer.Generator.Syntax.Templates;
@@ -31,7 +33,6 @@ namespace FirstOfficer.Generator
         {
             // StateManager.SaveState(comp, context);
             //  Syntax.Templates.Helpers.GetTemplate(context);
-
         }
 
         public void Initialize(GeneratorInitializationContext context)
@@ -46,6 +47,9 @@ namespace FirstOfficer.Generator
         {
             var symbols = new List<INamedTypeSymbol>();
 
+            //load appsettings.Development.json
+            var configuration = new AppSettingsService().GetAppSettings(context);
+            var openAiService = new OpenAiService(configuration);
             var comp = context.Compilation;
 
             foreach (var compSyntaxTree in comp.SyntaxTrees)
@@ -72,9 +76,9 @@ namespace FirstOfficer.Generator
                 foreach (var compSyntaxTree in comp.SyntaxTrees)
                 {
                     var root = compSyntaxTree.GetRoot();
-                    var sModel = comp.GetSemanticModel(compSyntaxTree);
                     var methodSymbol = root.DescendantNodes().OfType<IdentifierNameSyntax>()
                         .Where(b => b.Identifier.ValueText == methodName);
+                   
 
                     foreach (var syntax in methodSymbol)
                     {
@@ -90,22 +94,17 @@ namespace FirstOfficer.Generator
                         {
                             continue;
                         }
-                        // args[1].ToString()  "a => a.Id > Parameter.Value1 && a.Title.Contains(Parameter.Value2)"    string
-
+                        
                         var expression = args[1].ToString().Replace("\n","").Replace("\r","");
 
                         var key = Data.Query.Helper.GetExpressionKey($"{methodName}-{expression}");
-                        var response = (new OpenAiService().GetSqlFromExpression(expression)).Result;
+                        var response = (openAiService.GetSqlFromExpression(expression)).Result;
 
                         whereMethods.Add(key, GetWhereClause(response));
-
                     }
                 }
-
             }
 
-
-            
             string template = $@"
                 namespace FirstOfficer.Data.Query
                 {{

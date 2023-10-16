@@ -26,7 +26,7 @@ using LiteralExpressionSyntax = Microsoft.CodeAnalysis.CSharp.Syntax.LiteralExpr
 
 namespace FirstOfficer.Generator
 {
-    [Generator]
+    //[Generator]
     public class QueryMethodsGenerator : ISourceGenerator
     {
         private static void CreateSource(SourceProductionContext context, Compilation comp, List<string> methodNames)
@@ -90,17 +90,17 @@ namespace FirstOfficer.Generator
                         var args =
                             expressionSyntax
                                 .ArgumentList.Arguments;
-                        if (args.Count < 2 || IsArgumentNull(args[1]))
+                        if (args.Count < 1 || IsArgumentNull(args[0]))
                         {
                             continue;
                         }
                         
-                        var expression = args[1].ToString().Replace("\n","").Replace("\r","");
+                        var expression = args[0].ToString().Replace("\n","").Replace("\r","");
 
                         var key = Data.Query.Helper.GetExpressionKey($"{methodName}-{expression}");
                         var response = (openAiService.GetSqlFromExpression(expression)).Result;
-
-                        whereMethods.Add(key, GetWhereClause(response));
+                        var tableName = methodName.Replace("Query", "").ToSnakeCase();
+                        whereMethods.Add(key, GetWhereClause(tableName, response));
                     }
                 }
             }
@@ -130,10 +130,15 @@ namespace FirstOfficer.Generator
 
         }
 
-        private static string GetWhereClause(string sql)
+        private static string GetWhereClause(string name, string sql)
         {
             var rtn = sql.Substring(sql.IndexOf("WHERE", StringComparison.Ordinal));
-            rtn = rtn.Replace("\n", "").Replace("\r", "").Replace("Value", "value").Replace("@value_", "@value");
+            rtn = rtn.Replace("\n", " ")
+                .Replace("\r", "")
+                .Replace("Value", "value")
+                .Replace("@value_", "@value")
+                .Replace("the_table.", $"{name}.")
+                .Trim(' ', ';');
             return rtn;
 
         }

@@ -246,7 +246,7 @@ namespace FirstOfficer.Tests.Generator
 
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            var rtnBooks = (await DbConnection.QueryBooks(EntityBook.Includes.None )).ToList();
+            var rtnBooks = (await DbConnection.QueryBooks()).ToList();
             stopwatch.Stop();
             TimeSpan timeTaken = stopwatch.Elapsed;
             Console.WriteLine($"Code Generated Time taken: {timeTaken.TotalMilliseconds}ms");
@@ -263,7 +263,7 @@ namespace FirstOfficer.Tests.Generator
 
             stopwatch = new Stopwatch();
             stopwatch.Start();
-            var query = context.Books.Where(a => true);
+            var query = context.Books;
             rtnBooks = query.ToList();
             stopwatch.Stop();
             timeTaken = stopwatch.Elapsed;

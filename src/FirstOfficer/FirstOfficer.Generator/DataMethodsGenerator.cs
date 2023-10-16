@@ -15,7 +15,7 @@ using Microsoft.CSharp;
 
 namespace FirstOfficer.Generator
 {
-    //[Generator]
+    [Generator]
     public class DataMethodsGenerator : IIncrementalGenerator
     {
         public void Initialize(IncrementalGeneratorInitializationContext context)

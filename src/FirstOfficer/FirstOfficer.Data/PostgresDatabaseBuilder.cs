@@ -242,7 +242,7 @@ namespace FirstOfficer.Data
 
                 sql = $@"ALTER TABLE {tableName}
                                 ADD CONSTRAINT {fkName}
-                                FOREIGN KEY ({colName}) REFERENCES {fkTableName}(id);";
+                                FOREIGN KEY ({colName}) REFERENCES {fkTableName}(id) ON DELETE CASCADE;";
                 _connection.Execute(sql);
             }
         }

@@ -30,6 +30,17 @@ namespace FirstOfficer.Generator.Syntax.Templates
          
 ");
 
+            sb.AppendLine($@"  public enum {name}OrderBy
+        {{");
+
+            foreach (var prop in CodeAnalysisHelper.GetOrderByProperties(symbol))
+            {
+                sb.AppendLine($"{prop.Name}Asc,");
+                sb.AppendLine($"{prop.Name}Desc,");
+            }
+
+            sb.AppendLine(" }");
+
 
             return sb.ToString();
         }

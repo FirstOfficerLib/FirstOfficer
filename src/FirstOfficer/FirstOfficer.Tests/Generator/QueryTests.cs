@@ -15,6 +15,114 @@ namespace FirstOfficer.Tests.Generator
     [TestFixture]
     public class QueryTests : FirstOfficerTest
     {
+
+
+        //test for query with start and limit
+        [Test]
+        public async Task BookQueryWithStartAndLimitTest()
+        {
+            var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+            var books = new List<Book>();
+            for (int i = 0; i < 5; i++)
+            {
+                books.Add(new Book()
+                {
+                    Description = string.Empty.RandomString(100),
+                    ISBN = alphabet[i] + string.Empty.RandomString(10),
+                    Published = DateTime.Now,
+                    Title = alphabet[i] + string.Empty.RandomString(10)
+                });
+
+            }
+            var transaction = await DbConnection.BeginTransactionAsync();
+            await DbConnection.SaveBooks(books, transaction);
+            await transaction.CommitAsync();
+
+            var results = (await DbConnection.QueryBooks(null, null, null, new [] { EntityBook.BookOrderBy.IdAsc }, 0, 2)).ToArray();
+
+            Assert.That(results.Count(), Is.EqualTo(2));
+            Assert.That(results.First().Title, Is.EqualTo(books.First().Title));
+            Assert.That(results.Last().Title, Is.EqualTo(books[1].Title));
+
+            results = (await DbConnection.QueryBooks(null, null, null, new[] { EntityBook.BookOrderBy.IdAsc }, 2, 2)).ToArray();
+
+            Assert.That(results.Count(), Is.EqualTo(2));
+            Assert.That(results.First().Title, Is.EqualTo(books[2].Title));
+            Assert.That(results.Last().Title, Is.EqualTo(books[3].Title));
+
+            results = (await DbConnection.QueryBooks(null, null, null, new[] { EntityBook.BookOrderBy.IdAsc }, 4, 2)).ToArray();
+
+            Assert.That(results.Count(), Is.EqualTo(1));
+            Assert.That(results.First().Title, Is.EqualTo(books[4].Title));
+
+            var sql = $"DELETE FROM {DataHelper.GetTableName<Book>()};";
+            var command = DbConnection.CreateCommand();
+            command.CommandText = sql;
+            command.ExecuteNonQuery();
+            command.Dispose();
+            await transaction.DisposeAsync();
+        }
+
+
+
+        [Test]
+        public async Task BookOrderByQueryTest()
+        {
+            var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+            //Test order by title
+            var books = new List<Book>();
+            for (int i = 0; i < 5; i++)
+            {
+                books.Add(new Book()
+                {
+                    Description = string.Empty.RandomString(100),
+                    ISBN =  alphabet[i] + string.Empty.RandomString(10),
+                    Published = DateTime.Now,
+                    Title = alphabet[i] + string.Empty.RandomString(10)
+                });
+
+            }
+            var transaction = await DbConnection.BeginTransactionAsync();
+            await DbConnection.SaveBooks(books, transaction);
+            await transaction.CommitAsync();
+
+            var results = (await DbConnection.QueryBooks(null, null, null,
+                new[] { EntityBook.BookOrderBy.TitleDesc })).ToArray();
+
+            Assert.That(results.Count(), Is.EqualTo(5));
+            Assert.That(results.First().Title, Is.EqualTo(books.Last().Title));
+
+            //test order by title asc
+            results = (await DbConnection.QueryBooks(null, null, null,
+                               new[] { EntityBook.BookOrderBy.TitleAsc })).ToArray();       
+
+            Assert.That(results.Count(), Is.EqualTo(5));
+            Assert.That(results.First().Title, Is.EqualTo(books.First().Title));
+            
+            //test order by ISBN desc and then title 
+            results = (await DbConnection.QueryBooks(null, null, null,
+                                              new[] { EntityBook.BookOrderBy.ISBNDesc, EntityBook.BookOrderBy.TitleAsc })).ToArray();   
+
+            Assert.That(results.Count(), Is.EqualTo(5));
+            Assert.That(results.First().ISBN, Is.EqualTo(books.Last().ISBN));
+            Assert.That(results.First().Title, Is.EqualTo(books.Last().Title));
+            
+            
+            var sql = $"DELETE FROM {DataHelper.GetTableName<Book>()};";
+            var command = DbConnection.CreateCommand();
+            command.CommandText = sql;
+            command.ExecuteNonQuery();
+            command.Dispose();
+            await transaction.DisposeAsync();
+
+        }
+
+
+
+
+
         [Test]
         public async Task BookWhereQueryTest()
         {
@@ -42,58 +150,46 @@ namespace FirstOfficer.Tests.Generator
 
 
             // < Contains
-            var results = await DbConnection!.QueryBooks(
-                EntityBook.Includes.None,
-                a => a.Published < Parameter.Value1 && a.Title.Contains(Parameter.Value2),
-                new ParameterValues(DateTime.Now, "TestName"));
+            var results = await DbConnection!.QueryBooks(a => a.Published < Parameter.Value1 && a.Title.Contains(Parameter.Value2),
+                new ParameterValues(DateTime.Now, "TestName"), EntityBook.Includes.None);
 
             Assert.That(results.Count(), Is.EqualTo(1));
 
 
             // >=
-            results = await DbConnection!.QueryBooks(
-                EntityBook.Includes.None,
-                a => a.Published >= Parameter.Value1 && a.Title.Contains(Parameter.Value2),
-                new ParameterValues(DateTime.Now, "TestName"));
+            results = await DbConnection!.QueryBooks(a => a.Published >= Parameter.Value1 && a.Title.Contains(Parameter.Value2),
+                new ParameterValues(DateTime.Now, "TestName"), EntityBook.Includes.None);
 
             Assert.That(results.Count(), Is.EqualTo(0));
 
 
             // <
-            results = await DbConnection!.QueryBooks(
-                EntityBook.Includes.None,
-                a => a.Published < Parameter.Value1,
-                new ParameterValues(DateTime.Now));
+            results = await DbConnection!.QueryBooks(a => a.Published < Parameter.Value1,
+                new ParameterValues(DateTime.Now), EntityBook.Includes.None);
 
             Assert.That(results.Count(), Is.EqualTo(5));
 
             // == Title
-            results = (await DbConnection!.QueryBooks(
-                EntityBook.Includes.None,
-                a => a.Title ==  Parameter.Value1,
-                new ParameterValues(books[2].Title))).ToList();
+            results = (await DbConnection!.QueryBooks(a => a.Title == Parameter.Value1,
+                new ParameterValues(books[2].Title), EntityBook.Includes.None)).ToList();
 
             Assert.That(results.Count(), Is.EqualTo(1));
             Assert.That(results.First().Title, Is.EqualTo(books[2].Title));
 
             // == ISBN
-            results = (await DbConnection!.QueryBooks(
-                               EntityBook.Includes.None,
-                                              a => a.ISBN == Parameter.Value1,
-                                              new ParameterValues(books[1].ISBN))).ToList();
+            results = (await DbConnection!.QueryBooks(a => a.ISBN == Parameter.Value1,
+                                              new ParameterValues(books[1].ISBN), EntityBook.Includes.None)).ToList();
 
             Assert.That(results.Count(), Is.EqualTo(1));
             Assert.That(results.First().ISBN, Is.EqualTo(books[1].ISBN));
 
             // ALL ==
             var book3 = books[3];
-            results = (await DbConnection!.QueryBooks(
-                EntityBook.Includes.None,
-                a => a.ISBN == Parameter.Value1 
-                && a.Title == Parameter.Value2
-                && a.Published == Parameter.Value3
-                && a.Id == Parameter.Value4,
-                new ParameterValues(book3.ISBN,book3.Title,book3.Published,book3.Id))).ToList();
+            results = (await DbConnection!.QueryBooks(a => a.ISBN == Parameter.Value1
+                                                           && a.Title == Parameter.Value2
+                                                           && a.Published == Parameter.Value3
+                                                           && a.Id == Parameter.Value4,
+                new ParameterValues(book3.ISBN, book3.Title, book3.Published, book3.Id), EntityBook.Includes.None)).ToList();
 
             Assert.That(results.Count(), Is.EqualTo(1));
             Assert.That(results.First().ISBN, Is.EqualTo(book3.ISBN));
@@ -103,11 +199,9 @@ namespace FirstOfficer.Tests.Generator
 
             // OR 
 
-            results = (await DbConnection!.QueryBooks(
-                               EntityBook.Includes.None,
-                      a => (a.ISBN == Parameter.Value1 && a.Title == Parameter.Value2) ||
-                           (a.Published == Parameter.Value3 && a.Id == Parameter.Value4),
-                      new ParameterValues(books[1].ISBN, books[1].Title, books[4].Published, books[4].Id))).ToList();
+            results = (await DbConnection!.QueryBooks(a => (a.ISBN == Parameter.Value1 && a.Title == Parameter.Value2) ||
+                                                           (a.Published == Parameter.Value3 && a.Id == Parameter.Value4),
+                      new ParameterValues(books[1].ISBN, books[1].Title, books[4].Published, books[4].Id), EntityBook.Includes.None)).ToList();
 
             Assert.That(results.Count(), Is.EqualTo(2));
             Assert.That(results.First().ISBN, Is.EqualTo(books[1].ISBN));
@@ -115,7 +209,38 @@ namespace FirstOfficer.Tests.Generator
             Assert.That(results.Last().Published, Is.EqualTo(books[4].Published));
             Assert.That(results.Last().Id, Is.EqualTo(books[4].Id));
 
-            
+            await AddBooks();
+
+            var sql = $"DELETE FROM {DataHelper.GetTableName<Book>()};";
+            var command = DbConnection.CreateCommand();
+            command.CommandText = sql;
+            command.ExecuteNonQuery();
+            command.Dispose();
+            await transaction.DisposeAsync();
+        }
+
+        private async Task AddBooks()
+        {
+
+            var bookCount = 100000;
+            var books = new List<Book>();
+            for (int i = 0; i < bookCount; i++)
+            {
+                books.Add(new Book()
+                {
+                    Description = string.Empty.RandomString(100),
+                    ISBN = string.Empty.RandomString(10),
+                    Published = DateTime.Now,
+                    Title = string.Empty.RandomString(10)
+                });
+
+            }
+
+            var transaction = await DbConnection.BeginTransactionAsync();
+
+            await DbConnection.SaveBooks(books, transaction);
+
+            await transaction.CommitAsync();
         }
     }
 

@@ -31,6 +31,12 @@ namespace FirstOfficer.Generator.Helpers
                 .Where(a => a.GetAttributes().Any(b => b.AttributeClass?.Name == "QueryableAttribute")).ToArray();
         }
 
+        internal static IPropertySymbol[] GetOrderByProperties(INamedTypeSymbol entitySymbol)
+        {
+            return GetAllProperties(entitySymbol)
+                .Where(a => a.GetAttributes().Any(b => b.AttributeClass?.Name == "OrderByAttribute")).ToArray();
+        }
+
         internal static IPropertySymbol[] GetFlagProperties(INamedTypeSymbol entitySymbol)
         {
             return GetAllProperties(entitySymbol)

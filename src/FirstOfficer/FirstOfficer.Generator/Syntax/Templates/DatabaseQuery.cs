@@ -19,11 +19,16 @@ namespace FirstOfficer.Generator.Syntax.Templates
 
             var name = symbol.Name;
             sb.Append($@"
-             public static async Task<IEnumerable<{symbol.FullName()}>> Query{new Pluralizer().Pluralize(name)}(this IDbConnection dbConnection, Includes includes, 
-                    System.Linq.Expressions.Expression<Func<{symbol.Name}Queryable, bool>> expression = null,
-                    FirstOfficer.Data.Query.ParameterValues values = null)
+                public static async Task<IEnumerable<{symbol.FullName()}>> Query{new Pluralizer().Pluralize(symbol.Name)}(this IDbConnection dbConnection,
+                        System.Linq.Expressions.Expression<Func<{symbol.Name}Queryable, bool>> expression = null,
+                        FirstOfficer.Data.Query.ParameterValues values = null,
+                        Includes? includes = null,
+                        {symbol.Name}OrderBy[] orderBy = null,
+                        long? startIndex = null,
+                        long? recordCount = null)
              {{
-            var sql = GetSql(includes, expression);
+                 
+            var sql = GetSql(includes ?? Includes.None, expression, orderBy, startIndex, recordCount);
 
             using var command = new NpgsqlCommand(sql, dbConnection as NpgsqlConnection);
             
@@ -86,17 +91,24 @@ namespace FirstOfficer.Generator.Syntax.Templates
              }}
 
   
-             private static string GetSql(Includes includes, System.Linq.Expressions.Expression<Func<{symbol.Name}Queryable, bool>> expression)               
+               private static string GetSql(Includes includes, System.Linq.Expressions.Expression<Func<{symbol.Name}Queryable, bool>> expression,
+            {symbol.Name}OrderBy[] orderBys, long? startIndex, long? recordCount)          
              {{
                 var joins = string.Empty;
                
                 var cols = new List<string>() {{ {string.Join(", ", columnProperties.Select(a => $@"""{a}"""))} }};
 ");
+            var manyToManyProps = CodeAnalysisHelper.GetManyToManyProperties(symbol);
 
             foreach (var propertySymbol in flagProperties)
             {
                 sb.AppendLine($"if ((includes & Includes.{propertySymbol.Name}) == Includes.{propertySymbol.Name})");
                 sb.AppendLine("{");
+
+                //many-to-many
+                AddManyToManyLogic(symbol, manyToManyProps, propertySymbol, sb);
+
+                //one-to-one
                 if (CodeAnalysisHelper.IsEntity(propertySymbol.Type))
                 {
                     var moreCols = new List<string>();
@@ -106,7 +118,7 @@ namespace FirstOfficer.Generator.Syntax.Templates
                         .Select(a => $"{DataHelper.GetTableName(propName)}.{a.Name.ToSnakeCase()} as {DataHelper.GetTableName(propName)}_{a.Name.ToSnakeCase()} "));
 
 
-                    sb.AppendLine($"cols.AddRange(new[]{{ {string.Join(",", moreCols.Select(a=> $@"""{a}"""))} }});");
+                    sb.AppendLine($"cols.AddRange(new[]{{ {string.Join(",", moreCols.Select(a => $@"""{a}"""))} }});");
                     sb.AppendLine($@"joins += "" LEFT OUTER JOIN {DataHelper.GetTableName(propertySymbol.Type.Name)} ON {DataHelper.GetTableName(symbol.Name)}.{(propName + "Id").ToSnakeCase()} = {DataHelper.GetTableName(propertySymbol.Type.Name)}.Id "";");
                 }
 
@@ -123,14 +135,103 @@ namespace FirstOfficer.Generator.Syntax.Templates
                 {{
                     throw new ApplicationException(""Where clause not found"");
                 }}
-            }} ");
+            }} 
 
-            sb.AppendLine($@"var sql = $""SELECT {{string.Join("", "", cols) }} FROM {DataHelper.GetTableName(name)} {{joins}} {{whereClause}};"";");
+            var offset = string.Empty;
+            if (startIndex.HasValue)
+            {{
+                offset = $""OFFSET {{startIndex.Value}} "";
+            }}
+
+            var limit = string.Empty;
+            if (recordCount.HasValue)
+            {{
+                limit += $""LIMIT {{recordCount.Value}} "";
+            }}
+
+            var orderBy = string.Empty;
+            if (orderBys != null && orderBys.Any())
+            {{
+                var orderByBuilder = new StringBuilder(""ORDER BY "");
+                foreach (var orderByItem in orderBys)
+                {{
+                    switch (orderByItem)
+                    {{ ");
+
+            var tableName = DataHelper.GetTableName(symbol.Name);
+            //get order by properties
+            var props = CodeAnalysisHelper.GetOrderByProperties(symbol);
+
+            foreach (var prop in props)
+            {
+                sb.AppendLine($@"case {symbol.Name}OrderBy.{prop.Name}Asc:
+                            orderByBuilder.Append(""{tableName}.{prop.Name.ToSnakeCase()} ASC, "");
+                            break;
+                        case {symbol.Name}OrderBy.{prop.Name}Desc:
+                            orderByBuilder.Append(""{tableName}.{prop.Name.ToSnakeCase()} DESC, "");
+                            break;");
+
+            }
+
+            sb.AppendLine($@"
+                }}
+             }}
+
+                orderBy = orderByBuilder.ToString().TrimEnd(',', ' ');
+            }}
+");
+            sb.AppendLine($@"var sql = $""SELECT {{string.Join("", "", cols) }} FROM {DataHelper.GetTableName(name)} {{joins}} {{whereClause}} {{orderBy}} {{offset}} {{limit}};"";");
             sb.AppendLine("return sql;");
 
             sb.AppendLine("}");
 
             return sb.ToString();
+        }
+
+        private static void AddManyToManyLogic(INamedTypeSymbol symbol, IPropertySymbol[] manyToManyProps,
+            IPropertySymbol propertySymbol, StringBuilder sb)
+        {
+            var manyToManyProp = manyToManyProps.FirstOrDefault(a => a.Name == propertySymbol.Name);
+            if (manyToManyProp == null)
+            {
+                return;
+            }
+
+            var childType = ((INamedTypeSymbol)manyToManyProp.Type).TypeArguments.First();
+
+            var childCols = new List<string>();
+
+            childCols.Add(
+                $@"""{DataHelper.GetTableName(childType.Name)}.id as {DataHelper.GetTableName(childType.Name)}_id """);
+
+            foreach (var prop in CodeAnalysisHelper.GetMappedProperties((INamedTypeSymbol)childType))
+            {
+                childCols.Add(
+                    $@"""{DataHelper.GetTableName(childType.Name)}.{prop.Name.ToSnakeCase()} as {DataHelper.GetTableName(childType.Name)}_{prop.Name.ToSnakeCase()} """);
+            }
+
+            var otherProp =
+                CodeAnalysisHelper
+                    .GetManyToManyProperties((INamedTypeSymbol)((INamedTypeSymbol)manyToManyProp.Type).TypeArguments.First())
+                    .First();
+
+            //order properties
+            var orderedProps = new List<IPropertySymbol>() { propertySymbol, otherProp }.OrderBy(a => a.Name).ToArray();
+
+            string manyToManyTableName =
+                DataHelper.GetManyToManyTableName(
+                    ((INamedTypeSymbol)propertySymbol.Type).TypeArguments.First().Name,
+                    otherProp.Name,
+                    ((INamedTypeSymbol)otherProp.Type).TypeArguments.First().Name,
+                    propertySymbol.Name);
+
+            sb.AppendLine($"cols.AddRange(new[] {{ {string.Join(", ", childCols)} }});");
+
+            sb.AppendLine(
+                $" joins += \" LEFT OUTER JOIN {manyToManyTableName} ON {DataHelper.GetTableName(symbol.Name)}.id = {manyToManyTableName}.{symbol.Name.ToSnakeCase()}_id \"; ");
+            sb.AppendLine(
+                $" joins += \" LEFT OUTER JOIN {DataHelper.GetTableName(childType.Name)} ON {manyToManyTableName}.{childType.Name.ToSnakeCase()}_id = {DataHelper.GetTableName(childType.Name)}.id  \"; ");
+
         }
     }
 }

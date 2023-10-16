@@ -11,21 +11,19 @@ namespace FirstOfficer.Generator.AiServices
 {
     internal class OpenAiService : IAiService
     {
-        
-        private readonly string _key = string.Empty ;
-        private readonly string _orgId = string.Empty;
+
+        private readonly string _key;        
+        private readonly string _orgId;
 
         public OpenAiService(IConfiguration configuration)
         {
             _key = configuration["FirstOfficer:OpenAi:Key"] ?? string.Empty;
             _orgId = configuration["FirstOfficer:OpenAi:OrgId"] ?? string.Empty;
-            
         }
 
         public async Task<string> GetSqlFromExpression(string expression)
         {
-            string responsePayLoad;
-            var rootObject = new Root();
+            Root? rootObject;
             do
             {
                 var httpClient = new HttpClient();
@@ -39,7 +37,7 @@ namespace FirstOfficer.Generator.AiServices
                 request.Content = content;
                 var response = await httpClient.SendAsync(request);
 
-                responsePayLoad = await response.Content.ReadAsStringAsync();
+                var responsePayLoad = await response.Content.ReadAsStringAsync();
 
                 rootObject = JsonSerializer.Deserialize<Root>(responsePayLoad);
 
@@ -51,7 +49,7 @@ namespace FirstOfficer.Generator.AiServices
 
         private bool ValidatePayload(string responsePayLoad)
         {
-            return !responsePayLoad.Contains(@"""") && responsePayLoad.Contains("@") && responsePayLoad.Contains("WHERE") && responsePayLoad.EndsWith(";");
+            return !responsePayLoad.Contains(@"""") && responsePayLoad.Contains("the_table.") && responsePayLoad.Contains("@") && responsePayLoad.Contains("WHERE") && responsePayLoad.EndsWith(";");
         }
 
 
@@ -64,10 +62,13 @@ namespace FirstOfficer.Generator.AiServices
                             {{""role"": ""system"", ""content"":""This is for a code generation application for converting LamdbaExpressions into Postgres SQL statements in C#""}}, 
                             {{""role"": ""system"", ""content"":""use ANY for arrays""}},                     
                             {{""role"": ""system"", ""content"":""Single parameter for each Value""}}, 
-                            {{""role"": ""system"", ""content"":""proceed the parameter with @""}}, 
+                            {{""role"": ""system"", ""content"":""Table name is the_table""}},   
+                            {{""role"": ""system"", ""content"":""the_table is joined with the_chair by id""}},
+                            {{""role"": ""system"", ""content"":""add the_table. to the column names""}}, 
+                            {{""role"": ""system"", ""content"":""use the fully qualified column names""}}, 
+                            {{""role"": ""system"", ""content"":""precede the parameter with @""}},                             
                             {{""role"": ""system"", ""content"":""use ILIKE""}}, 
-                            {{""role"": ""system"", ""content"":""End statement with a semi-colon""}},      
-                            {{""role"": ""system"", ""content"":""Table name is books""}},
+                            {{""role"": ""system"", ""content"":""End statement with a semi-colon""}},                                
                             {{""role"": ""system"", ""content"":""Content response in ```sql only""}},      
                             {{""role"": ""system"", ""content"":""Database columns names are in snake case.""}},
                             {{""role"": ""user"", ""content"":""books.Where({expression});""}}],

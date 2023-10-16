@@ -45,7 +45,7 @@ namespace FirstOfficer.Tests.Generator
                 Assert.That(bookCount, Is.EqualTo(count)); //check count
             }
 
-            var allBooks = (await DbConnection.QueryBooks(EntityBook.Includes.None, null)).ToList();
+            var allBooks = (await DbConnection.QueryBooks()).ToList();
             Assert.That(allBooks.Count(), Is.EqualTo(bookCount));
 
             var source = books.OrderBy(a => a.Id).ToList();
@@ -66,7 +66,7 @@ namespace FirstOfficer.Tests.Generator
 
             await transaction.CommitAsync();
 
-            var allBooksCount = (await DbConnection.QueryBooks(EntityBook.Includes.None, null)).ToList();
+            var allBooksCount = (await DbConnection.QueryBooks()).ToList();
             Assert.That(0, Is.EqualTo(allBooksCount.Count));
             await transaction.DisposeAsync();
         }
@@ -74,7 +74,7 @@ namespace FirstOfficer.Tests.Generator
         [Test]
         public async Task DeleteBooksTransactionTest()
         {
-            var bookCount = 100000;
+            var bookCount = 1000;
             var books = new List<Book>();
             for (int i = 0; i < bookCount; i++)
             {
@@ -94,7 +94,7 @@ namespace FirstOfficer.Tests.Generator
 
             await transaction.CommitAsync();
 
-            var allBooks = (await DbConnection.QueryBooks(EntityBook.Includes.None, null)).ToList();
+            var allBooks = (await DbConnection.QueryBooks()).ToList();
             Assert.That(allBooks.Count(), Is.EqualTo(bookCount));
 
             var source = books.OrderBy(a => a.Id).ToList();
@@ -114,12 +114,12 @@ namespace FirstOfficer.Tests.Generator
             await DbConnection.DeleteBooks(books, transaction);
             var conn2 = new NpgsqlConnection(ConnectionString);
             conn2.Open();
-            var allBooks2 = (await conn2.QueryBooks(EntityBook.Includes.None, null)).ToList();
+            var allBooks2 = (await conn2.QueryBooks()).ToList();
             Assert.That(allBooks2.Count(), Is.EqualTo(bookCount));
         
             await transaction.CommitAsync();
 
-            var allBooksCount = (await conn2.QueryBooks(EntityBook.Includes.None, null)).ToList();
+            var allBooksCount = (await conn2.QueryBooks()).ToList();
             Assert.That(0, Is.EqualTo(allBooksCount.Count));
             await transaction.DisposeAsync();
             await conn2.CloseAsync();

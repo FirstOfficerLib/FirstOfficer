@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace FirstOfficer.Generator.AiServices
+namespace FirstOfficer.Generator.Services.AiServices
 {
     internal interface IAiService
     {

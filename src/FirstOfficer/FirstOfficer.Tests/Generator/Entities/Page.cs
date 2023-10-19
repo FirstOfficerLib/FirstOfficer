@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FirstOfficer.Data;
+﻿using FirstOfficer.Data;
 using FirstOfficer.Data.Attributes;
 
-namespace FirstOfficer.Tests.Generator.Models
+namespace FirstOfficer.Tests.Generator.Entities
 {
     public class Page : Entity
     {

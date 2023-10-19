@@ -1,4 +1,5 @@
 ﻿using FirstOfficer.Generator.Extensions;
+using FirstOfficer.Generator.Services;
 using Microsoft.CodeAnalysis;
 using Pluralize.NET;
 using System.Reflection;
@@ -60,7 +61,7 @@ namespace FirstOfficer.Generator.Helpers
         {
             var rtn = new Dictionary<string, (IPropertySymbol, IPropertySymbol)>();
 
-            var props = CodeAnalysisHelper.GetManyToManyProperties(entityType);
+            var props = OrmSymbolService.GetManyToManyProperties(entityType);
 
             foreach (var prop1 in props)
             {
@@ -69,7 +70,7 @@ namespace FirstOfficer.Generator.Helpers
                     continue;
                 }
 
-                var prop2 = CodeAnalysisHelper.GetManyToManyProperties(type1).FirstOrDefault(a => 
+                var prop2 = OrmSymbolService.GetManyToManyProperties(type1).FirstOrDefault(a => 
                         a.Type is INamedTypeSymbol symbol &&
                         SymbolEqualityComparer.Default.Equals(symbol.TypeArguments[0],entityType));
                 if (prop2 == null)

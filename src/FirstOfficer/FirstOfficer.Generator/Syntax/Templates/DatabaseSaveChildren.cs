@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using FirstOfficer.Generator.Extensions;
 using FirstOfficer.Generator.Helpers;
+using FirstOfficer.Generator.Services;
 using Microsoft.CodeAnalysis;
 using Pluralize.NET;
 
@@ -12,9 +13,9 @@ namespace FirstOfficer.Generator.Syntax.Templates
         internal static string GetTemplate(INamedTypeSymbol entitySymbol)
         {
             var sb = new StringBuilder();
-            var oneToOnes = CodeAnalysisHelper.GetOneToOneProperties(entitySymbol).ToArray();
-            var oneToMany = CodeAnalysisHelper.GetOneToManyProperties(entitySymbol).ToArray();
-            var properties = CodeAnalysisHelper.GetMappedProperties(entitySymbol).ToArray();
+            var oneToOnes = OrmSymbolService.GetOneToOneProperties(entitySymbol).ToArray();
+            var oneToMany = OrmSymbolService.GetOneToManyProperties(entitySymbol).ToArray();
+            var properties = OrmSymbolService.GetMappedProperties(entitySymbol).ToArray();
             var name = entitySymbol.Name;
 
             sb.AppendLine($@"
@@ -76,7 +77,7 @@ namespace FirstOfficer.Generator.Syntax.Templates
 
             sb.AppendLine($@" }}");
 
-            var manyToManyTypes = CodeAnalysisHelper.GetManyToManyProperties(entitySymbol).ToArray();
+            var manyToManyTypes = OrmSymbolService.GetManyToManyProperties(entitySymbol).ToArray();
 
             var manyToMany = DataHelper.GetManyToMany(entitySymbol);
 

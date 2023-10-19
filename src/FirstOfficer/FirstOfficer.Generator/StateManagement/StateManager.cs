@@ -26,7 +26,7 @@ namespace FirstOfficer.Generator.StateManagement
             return BitConverter.ToString(hashBytes).Replace("-", "");
         }
 
-        internal static Dictionary<string, string> LoadState(Compilation comp)
+        internal static Dictionary<string, string> LoadState(Microsoft.CodeAnalysis.Compilation comp)
         {
 
             var rtn = new Dictionary<string, string>();
@@ -62,7 +62,7 @@ namespace FirstOfficer.Generator.StateManagement
             return rtn;
         }
 
-        internal static Dictionary<string, string> CurrentState(Compilation comp)
+        internal static Dictionary<string, string> CurrentState(Microsoft.CodeAnalysis.Compilation comp)
         {
    
             var rtn = new Dictionary<string, string>();
@@ -89,7 +89,7 @@ namespace FirstOfficer.Generator.StateManagement
             return rtn;
         }
 
-        internal static void SaveState(Compilation comp, SourceProductionContext context)
+        internal static void SaveState(Microsoft.CodeAnalysis.Compilation comp, SourceProductionContext context)
         {
             var checksums = CurrentState(comp);
 

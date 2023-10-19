@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using FirstOfficer.Generator.Extensions;
 using FirstOfficer.Generator.Helpers;
+using FirstOfficer.Generator.Services;
 using Microsoft.CodeAnalysis;
 using Pluralize.NET;
 
@@ -13,9 +14,9 @@ namespace FirstOfficer.Generator.Syntax.Templates
         {
             var sb = new StringBuilder();
             var columnProperties = new List<string>() { $"{DataHelper.GetTableName(symbol.Name)}.id as {DataHelper.GetTableName(symbol.Name)}_id" };
-            columnProperties.AddRange(CodeAnalysisHelper.GetMappedProperties(symbol)
+            columnProperties.AddRange(OrmSymbolService.GetMappedProperties(symbol)
                 .Select(a => $"{DataHelper.GetTableName(symbol.Name)}.{a.Name.ToSnakeCase()} as {DataHelper.GetTableName(symbol.Name)}_{a.Name.ToSnakeCase()}").ToList());
-            var flagProperties = CodeAnalysisHelper.GetFlagProperties(symbol);
+            var flagProperties = OrmSymbolService.GetFlagProperties(symbol);
 
             var name = symbol.Name;
             sb.Append($@"
@@ -98,7 +99,7 @@ namespace FirstOfficer.Generator.Syntax.Templates
                
                 var cols = new List<string>() {{ {string.Join(", ", columnProperties.Select(a => $@"""{a}"""))} }};
 ");
-            var manyToManyProps = CodeAnalysisHelper.GetManyToManyProperties(symbol);
+            var manyToManyProps = OrmSymbolService.GetManyToManyProperties(symbol);
 
             foreach (var propertySymbol in flagProperties)
             {
@@ -109,12 +110,12 @@ namespace FirstOfficer.Generator.Syntax.Templates
                 AddManyToManyLogic(symbol, manyToManyProps, propertySymbol, sb);
 
                 //one-to-one
-                if (CodeAnalysisHelper.IsEntity(propertySymbol.Type))
+                if (OrmSymbolService.IsEntity(propertySymbol.Type))
                 {
                     var moreCols = new List<string>();
                     var propName = new Pluralizer().Singularize(propertySymbol.Name);
                     moreCols.Add($"{DataHelper.GetTableName(propName)}.id as {DataHelper.GetTableName(propName)}_id ");
-                    moreCols.AddRange(CodeAnalysisHelper.GetMappedProperties((INamedTypeSymbol)propertySymbol.Type)
+                    moreCols.AddRange(OrmSymbolService.GetMappedProperties((INamedTypeSymbol)propertySymbol.Type)
                         .Select(a => $"{DataHelper.GetTableName(propName)}.{a.Name.ToSnakeCase()} as {DataHelper.GetTableName(propName)}_{a.Name.ToSnakeCase()} "));
 
 
@@ -160,7 +161,7 @@ namespace FirstOfficer.Generator.Syntax.Templates
 
             var tableName = DataHelper.GetTableName(symbol.Name);
             //get order by properties
-            var props = CodeAnalysisHelper.GetOrderByProperties(symbol);
+            var props = OrmSymbolService.GetOrderByProperties(symbol);
 
             foreach (var prop in props)
             {
@@ -204,14 +205,14 @@ namespace FirstOfficer.Generator.Syntax.Templates
             childCols.Add(
                 $@"""{DataHelper.GetTableName(childType.Name)}.id as {DataHelper.GetTableName(childType.Name)}_id """);
 
-            foreach (var prop in CodeAnalysisHelper.GetMappedProperties((INamedTypeSymbol)childType))
+            foreach (var prop in OrmSymbolService.GetMappedProperties((INamedTypeSymbol)childType))
             {
                 childCols.Add(
                     $@"""{DataHelper.GetTableName(childType.Name)}.{prop.Name.ToSnakeCase()} as {DataHelper.GetTableName(childType.Name)}_{prop.Name.ToSnakeCase()} """);
             }
 
             var otherProp =
-                CodeAnalysisHelper
+                OrmSymbolService
                     .GetManyToManyProperties((INamedTypeSymbol)((INamedTypeSymbol)manyToManyProp.Type).TypeArguments.First())
                     .First();
 

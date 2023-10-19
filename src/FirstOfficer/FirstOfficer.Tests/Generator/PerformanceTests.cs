@@ -1,5 +1,4 @@
-﻿using FirstOfficer.Tests.Generator.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Diagnostics;
@@ -10,6 +9,7 @@ using Dapper;
 using System.Data;
 using FirstOfficer.Data;
 using FirstOfficer.Data.Query;
+using FirstOfficer.Tests.Generator.Entities;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 

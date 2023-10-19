@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using FirstOfficer.Generator.Extensions;
 using FirstOfficer.Generator.Helpers;
+using FirstOfficer.Generator.Services;
 using Microsoft.CodeAnalysis;
 
 namespace FirstOfficer.Generator.Syntax.Templates
@@ -13,10 +14,10 @@ namespace FirstOfficer.Generator.Syntax.Templates
 
             var entityName = entitySymbol.Name;
 
-            var mappedProperties = CodeAnalysisHelper.GetMappedProperties(entitySymbol).ToArray();
+            var mappedProperties = OrmSymbolService.GetMappedProperties(entitySymbol).ToArray();
 
-            var columnProperties = CodeAnalysisHelper.GetMappedProperties(entitySymbol).Select(a => a.Name.ToSnakeCase()).OrderBy(a => a).ToArray();
-            var properties = CodeAnalysisHelper.GetMappedProperties(entitySymbol).Select(a => a.Name).OrderBy(a => a).ToArray();
+            var columnProperties = OrmSymbolService.GetMappedProperties(entitySymbol).Select(a => a.Name.ToSnakeCase()).OrderBy(a => a).ToArray();
+            var properties = OrmSymbolService.GetMappedProperties(entitySymbol).Select(a => a.Name).OrderBy(a => a).ToArray();
 
             var valueProperties = new List<string>() { "Id" };
             valueProperties.AddRange(properties);
@@ -72,7 +73,7 @@ namespace FirstOfficer.Generator.Syntax.Templates
                 }
 
 
-                return rtn + $@"command.Parameters.AddWithValue($""{prop.Name}_{{i}}"", {CodeAnalysisHelper.HandleWhenNull(prop)});";
+                return rtn + $@"command.Parameters.AddWithValue($""{prop.Name}_{{i}}"", {OrmSymbolService.HandleWhenNull(prop)});";
             }))}
                         command.Parameters.AddWithValue($""Checksum_{{i}}"", entity.Checksum());
                         command.Parameters.AddWithValue($""Id_{{i}}"", entity.Id);

@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using FirstOfficer.Generator.Extensions;
 using FirstOfficer.Generator.Helpers;
+using FirstOfficer.Generator.Services;
 using Microsoft.CodeAnalysis;
 using Pluralize.NET;
 
@@ -15,8 +16,8 @@ namespace FirstOfficer.Generator.Syntax.Templates
 
             var dbProps = GetPropertySymbols(entity);
 
-            var oneToOne = CodeAnalysisHelper.GetOneToOneProperties(entity);
-            var manyToMany = CodeAnalysisHelper.GetManyToManyProperties(entity);
+            var oneToOne = OrmSymbolService.GetOneToOneProperties(entity);
+            var manyToMany = OrmSymbolService.GetManyToManyProperties(entity);
             var entityName = entity.Name;
             var tableName = DataHelper.GetTableName(entityName);
 
@@ -90,7 +91,7 @@ namespace FirstOfficer.Generator.Syntax.Templates
 
         private static List<IPropertySymbol> GetPropertySymbols(INamedTypeSymbol entity)
         {
-            return CodeAnalysisHelper.GetAllProperties(entity).Where(a =>
+            return SymbolService.GetAllProperties(entity).Where(a =>
                 a.Type is INamedTypeSymbol { IsGenericType: false } symbol &&
                 symbol.AllInterfaces.All(b => b.Name != "IEntity")).ToList();
         }

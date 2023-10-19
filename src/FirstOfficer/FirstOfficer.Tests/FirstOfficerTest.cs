@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FirstOfficer.Data;
 using FirstOfficer.Generator.Extensions;
-using FirstOfficer.Tests.Generator.Models;
+using FirstOfficer.Tests.Generator.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

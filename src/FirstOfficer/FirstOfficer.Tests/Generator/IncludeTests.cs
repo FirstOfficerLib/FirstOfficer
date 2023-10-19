@@ -1,11 +1,11 @@
 ﻿using FirstOfficer.Data;
-using FirstOfficer.Tests.Generator.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FirstOfficer.Data.Query;
+using FirstOfficer.Tests.Generator.Entities;
 
 namespace FirstOfficer.Tests.Generator
 {

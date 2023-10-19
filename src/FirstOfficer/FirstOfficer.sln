@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FirstOfficer.Mapping", "Fir
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FirstOfficer.Tests", "FirstOfficer.Tests\FirstOfficer.Tests.csproj", "{FF0DBDDC-C17A-4974-98FD-C3AA2A8272DC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FirstOfficer.Api", "FirstOfficer.Api\FirstOfficer.Api.csproj", "{4F2E2FC0-869D-433B-A674-44B7F1C24184}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{FF0DBDDC-C17A-4974-98FD-C3AA2A8272DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FF0DBDDC-C17A-4974-98FD-C3AA2A8272DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FF0DBDDC-C17A-4974-98FD-C3AA2A8272DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F2E2FC0-869D-433B-A674-44B7F1C24184}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F2E2FC0-869D-433B-A674-44B7F1C24184}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F2E2FC0-869D-433B-A674-44B7F1C24184}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F2E2FC0-869D-433B-A674-44B7F1C24184}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

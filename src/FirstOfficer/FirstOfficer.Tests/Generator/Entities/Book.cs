@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using FirstOfficer.Data;
 using FirstOfficer.Data.Attributes;
 
-namespace FirstOfficer.Tests.Generator.Models
+namespace FirstOfficer.Tests.Generator.Entities
 {
     [Table("books")]
     public class Book : Entity
@@ -19,7 +14,7 @@ namespace FirstOfficer.Tests.Generator.Models
         public string Title { get; set; }
         [Column("page_count")] //for benchmarking for EF Core
         //page count
-        public int PageCount => Pages.Count();
+        public int PageCount {get; set; }
         [Queryable]
         [OrderBy]
         [Column("published")]

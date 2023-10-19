@@ -4,7 +4,9 @@ using System.Collections.Immutable;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Xml.Linq;
+using FirstOfficer.Generator.Diagnostics;
 using FirstOfficer.Generator.Helpers;
+using FirstOfficer.Generator.Services;
 using FirstOfficer.Generator.StateManagement;
 using FirstOfficer.Generator.Syntax;
 using FirstOfficer.Generator.Syntax.Templates;
@@ -15,15 +17,23 @@ using Microsoft.CSharp;
 
 namespace FirstOfficer.Generator
 {
-    [Generator]
-    public class DataMethodsGenerator : IIncrementalGenerator
+    //[Generator]
+    public class OrmMethodsGenerator : IIncrementalGenerator
     {
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
 
 #if DEBUG
-             //   DebugGenerator.AttachDebugger();
+            //   DebugGenerator.AttachDebugger();
 #endif
+
+            //diagnostics
+            var diagnostic = context.CompilationProvider.SelectMany(
+                static (compilation, _) => CompilationDiagnostics.BuildCompilationDiagnostics(compilation, DiagnosticCategories.Orm)
+            );
+            context.RegisterSourceOutput(diagnostic, static (context, diagnostic) => context.ReportDiagnostic(diagnostic));
+
+
             var entitiesProvider =
                 context.SyntaxProvider.CreateSyntaxProvider(
                      IsClass,
@@ -39,27 +49,14 @@ namespace FirstOfficer.Generator
 
         private bool IsClass(SyntaxNode node, CancellationToken token)
         {
-            return node is ClassDeclarationSyntax;
+            return node.IsKind(SyntaxKind.ClassDeclaration);
         }
-
-        private static bool ContainsInterface(
-            Compilation comp,
-            ClassDeclarationSyntax node, string interfaceName)
-        {
-            var tree = node.SyntaxTree;
-            var root = tree.GetRoot();
-            var sModel = comp.GetSemanticModel(node.SyntaxTree);
-            var classSymbol = sModel.GetDeclaredSymbol(root.DescendantNodes().OfType<ClassDeclarationSyntax>().First());
-
-            return classSymbol!.AllInterfaces.Any(a=> a.Name == interfaceName);
-        }
-
-        private static void CreateSource(SourceProductionContext context, Compilation comp, ImmutableArray<ClassDeclarationSyntax> entitiesDeclarations)
+        private static void CreateSource(SourceProductionContext context, Microsoft.CodeAnalysis.Compilation comp, ImmutableArray<ClassDeclarationSyntax> entitiesDeclarations)
         {
             foreach (var entityDeclarationSyntax in entitiesDeclarations)
             {
                 var entitiesDeclaration = comp.GetSemanticModel(entityDeclarationSyntax.SyntaxTree).GetDeclaredSymbol(entityDeclarationSyntax);
-                if (entitiesDeclaration == null || !ContainsInterface(comp, entityDeclarationSyntax,"IEntity"))
+                if (entitiesDeclaration == null || !OrmSymbolService.IsEntity(entitiesDeclaration))
                 {
                     continue;
                 }
@@ -107,7 +104,7 @@ namespace FirstOfficer.Generator
 
         }
 
-        private static CodeCompileUnit GetCodeCompileUnit(SourceProductionContext context, Compilation comp,
+        private static CodeCompileUnit GetCodeCompileUnit(SourceProductionContext context, Microsoft.CodeAnalysis.Compilation comp,
             string className)
         {
             var codeCompileUnit = new CodeCompileUnit();

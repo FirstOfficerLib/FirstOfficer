@@ -6,7 +6,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using FirstOfficer.Data;
-using FirstOfficer.Tests.Generator.Models;
+using FirstOfficer.Tests.Generator.Entities;
 using Npgsql;
 
 namespace FirstOfficer.Tests.Generator

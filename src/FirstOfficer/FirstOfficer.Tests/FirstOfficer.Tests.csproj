@@ -54,8 +54,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Generated\FirstOfficer.Generator\FirstOfficer.Generator.MapperGenerator\" />
-    <Folder Include="Generated\FirstOfficer.Generator\FirstOfficer.Generator.QueryMethodsGenerator\" />
+    <Folder Include="Generated\FirstOfficer.Generator\" />
   </ItemGroup>
 
 </Project>

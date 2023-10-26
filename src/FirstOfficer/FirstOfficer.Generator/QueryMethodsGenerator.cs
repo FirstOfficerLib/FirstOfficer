@@ -39,7 +39,7 @@ namespace FirstOfficer.Generator
         public void Initialize(GeneratorInitializationContext context)
         {
 #if DEBUG
-               DebugGenerator.AttachDebugger();
+             //  DebugGenerator.AttachDebugger();
 #endif
 
             //TODO:diagnostics

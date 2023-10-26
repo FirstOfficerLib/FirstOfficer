@@ -3,6 +3,7 @@ using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using System.Reflection;
 using System.Runtime.Serialization;
+using System.Text;
 using System.Xml.Linq;
 using FirstOfficer.Generator.Diagnostics;
 using FirstOfficer.Generator.Helpers;
@@ -61,40 +62,25 @@ namespace FirstOfficer.Generator
                     continue;
                 }
                 var className = entitiesDeclaration.Name;
-                var codeCompileUnit = GetCodeCompileUnit(context, comp, className);
-                var codeTypeDeclaration = codeCompileUnit.Namespaces[0].Types[0];
+            
+                var classContent = new StringBuilder();
                 //add save templates
-                codeTypeDeclaration.Members.Add(SaveGenerator.GenerateSaveMethods(entitiesDeclaration));
+                classContent.AppendLine(SaveGenerator.GenerateSaveMethods(entitiesDeclaration));
 
                 //add query methods
-                codeTypeDeclaration.Members.Add(
-                    new CodeSnippetTypeMember(DatabaseQueryable.GetTemplate(entitiesDeclaration)));
+                classContent.AppendLine(DatabaseQueryable.GetTemplate(entitiesDeclaration));
 
-                codeTypeDeclaration.Members.Add(
-                    new CodeSnippetTypeMember(EntityEnums.GetTemplate(entitiesDeclaration)));
-                
-                
-                codeTypeDeclaration.Members.Add(
-                    new CodeSnippetTypeMember(DatabaseQuery.GetTemplate(entitiesDeclaration)));
+                classContent.AppendLine(EntityEnums.GetTemplate(entitiesDeclaration));
 
-                codeTypeDeclaration.Members.Add(
-                    new CodeSnippetTypeMember(EntityMapper.GetTemplate(entitiesDeclaration)));
+                classContent.AppendLine(DatabaseQuery.GetTemplate(entitiesDeclaration));
 
-                codeTypeDeclaration.Members.Add(
-                    new CodeSnippetTypeMember(DatabaseDelete.GetTemplate(entitiesDeclaration)));
+                classContent.AppendLine(EntityMapper.GetTemplate(entitiesDeclaration));
+
+                classContent.AppendLine(DatabaseDelete.GetTemplate(entitiesDeclaration));
 
                 //write the class
-                var provider = new CSharpCodeProvider();
-                using var writer = new StringWriter();
-                provider.GenerateCodeFromCompileUnit(codeCompileUnit, writer, new CodeGeneratorOptions()
-                {
-                    BracingStyle = "C",
-                    IndentString = "    ", // Using 4 spaces for indentation
-                    BlankLinesBetweenMembers = true
-                });
-                string output = writer.ToString()
-                    .Replace($"class {className}Entity", $"static class {className}Entity"); //hack to make it static
 
+                var output = WrapClass($"{className}Entity", classContent.ToString());
                 context.AddSource($"{className}Entity.g.cs", SyntaxHelper.FormatCode(output));
 
             }
@@ -104,30 +90,29 @@ namespace FirstOfficer.Generator
 
         }
 
-        private static CodeCompileUnit GetCodeCompileUnit(SourceProductionContext context, Microsoft.CodeAnalysis.Compilation comp,
-            string className)
+        private static string WrapClass(string className, string classContents)
         {
-            var codeCompileUnit = new CodeCompileUnit();
 
-            var codeNamespace = new CodeNamespace("FirstOfficer");
-            codeNamespace.Imports.Add(new CodeNamespaceImport("System"));
-            codeNamespace.Imports.Add(new CodeNamespaceImport("System.Collections"));
-            codeNamespace.Imports.Add(new CodeNamespaceImport("System.Data"));
-            codeNamespace.Imports.Add(new CodeNamespaceImport("FirstOfficer.Data"));
-            codeNamespace.Imports.Add(new CodeNamespaceImport("Npgsql"));
-            codeNamespace.Imports.Add(new CodeNamespaceImport("System.Text"));
-            codeNamespace.Imports.Add(new CodeNamespaceImport("System.Data.Common"));
+            return $@"
 
-            codeCompileUnit.Namespaces.Add(codeNamespace);
+                using System;
+                using System.Collections;
+                using System.Collections.Generic;
+                using System.Data;
+                using FirstOfficer.Data;
+                using Npgsql;   
+                using System.Text;
+                using System.Data.Common;
 
-            var codeTypeDeclaration = new CodeTypeDeclaration($"{className}Entity")
-            {
-                IsClass = true,
-                IsPartial = false,
-                TypeAttributes = TypeAttributes.Public
-            };
-            codeNamespace.Types.Add(codeTypeDeclaration);
-            return codeCompileUnit;
+                namespace FirstOfficer
+                {{
+                    public static class {className}
+                    {{
+                        {classContents}
+                    }}
+                }}
+
+            ";
         }
 
   

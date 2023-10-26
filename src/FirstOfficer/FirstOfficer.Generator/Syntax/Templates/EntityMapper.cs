@@ -82,7 +82,7 @@ namespace FirstOfficer.Generator.Syntax.Templates
 
                     if (!idsFor{prop.Name}.Contains((Int64)reader[""{DataHelper.GetTableName(namedTypeSymbol.Name)}_id""]))
                     {{
-                        entity.{prop.Name}.Add(Entity{namedTypeSymbol.Name}.RowMapper(reader));
+                        entity.{prop.Name}.Add({namedTypeSymbol.Name}Entity.RowMapper(reader));
                         idsFor{prop.Name}.Add((Int64)reader[""{DataHelper.GetTableName(namedTypeSymbol.Name)}_id""]);
                     }}
                 }}

@@ -62,7 +62,7 @@ namespace FirstOfficer.Generator.Services
         {
             return SymbolService.GetAllProperties(entitySymbol).Where(a =>
                 a.Type is INamedTypeSymbol { IsGenericType: false } symbol &&
-                symbol.AllInterfaces.Any(IsEntity)).ToArray();
+                IsEntity(symbol)).ToArray();
         }
 
 
@@ -72,7 +72,7 @@ namespace FirstOfficer.Generator.Services
             return SymbolService.GetAllProperties(entitySymbol).Where(a =>
                 a.Type is INamedTypeSymbol symbol &&
                 SymbolService.IsCollection(symbol) &&
-                symbol.TypeArguments.All(b => b.AllInterfaces.Any(IsEntity)))
+                symbol.TypeArguments.All(IsEntity))
                 .Where(a =>
                     SymbolService.GetAllProperties(((a.Type as INamedTypeSymbol)?.TypeArguments[0] as INamedTypeSymbol)!)
                         .Any(b => b.Name == $"{entitySymbol.Name}Id")
@@ -83,11 +83,14 @@ namespace FirstOfficer.Generator.Services
 
         internal static IPropertySymbol[] GetManyToManyProperties(INamedTypeSymbol entitySymbol)
         {
+
+
             return SymbolService.GetAllProperties(entitySymbol).Where(a =>
                     a.Type is INamedTypeSymbol symbol &&
                     SymbolService.IsCollection(symbol) &&
                     symbol.TypeArguments.Count() == 1 &&
-                    symbol.TypeArguments.All(b => b.AllInterfaces.Any(IsEntity))).Where(a =>
+                    symbol.TypeArguments.All(IsEntity))
+                .Where(a =>
                     SymbolService.GetAllProperties(((a.Type as INamedTypeSymbol)?.TypeArguments[0] as INamedTypeSymbol)!)  //get all properties of the collection type
                         .Any(b => b.Type is       //make sure the property type is of entitySymbol type
                              INamedTypeSymbol symbol &&
@@ -95,7 +98,6 @@ namespace FirstOfficer.Generator.Services
                              symbol.TypeArguments.Count() == 1 &&
                              symbol.TypeArguments.All(c => SymbolEqualityComparer.Default.Equals(c, entitySymbol))))
                 .ToArray();
-
         }
 
         internal static string HandleWhenNull(IPropertySymbol prop)

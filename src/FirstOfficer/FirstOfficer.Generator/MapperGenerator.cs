@@ -44,7 +44,7 @@ namespace FirstOfficer.Generator
             foreach (var mapping in mappings)
             {
                  var source = DtoMapper.GetTemplate(mapping);
-                 sourceProductionContext.AddSource(mapping.DtoSymbol.Name + "Mapper", source);
+                 sourceProductionContext.AddSource(mapping.DtoSymbol.Name + "Mapper.g.cs", source);
             }
             
         }

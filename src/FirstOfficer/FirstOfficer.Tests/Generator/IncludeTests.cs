@@ -52,7 +52,7 @@ namespace FirstOfficer.Tests.Generator
             await transaction.CommitAsync();
 
             var results = (await DbConnection.QueryBooks(b=> b.Id == Parameter.Value1, 
-                new ParameterValues(books[0].Id), EntityBook.Includes.Authors)).ToList();
+                new ParameterValues(books[0].Id), BookEntity.Includes.Authors)).ToList();
 
             Assert.That(results.Count(), Is.EqualTo(1));
             Assert.That(results.First().Authors.Count(), Is.EqualTo(2));

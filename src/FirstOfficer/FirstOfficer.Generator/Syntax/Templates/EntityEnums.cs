@@ -13,11 +13,6 @@ namespace FirstOfficer.Generator.Syntax.Templates
         {
             var valueProperties = OrmSymbolService.GetFlagProperties(entitySymbol);
 
-            if (valueProperties.Length == 0)
-            {
-                return string.Empty;
-            }
-
             var values = new StringBuilder();
             var i = 1;
             foreach (var propertySymbol in valueProperties)

@@ -26,8 +26,8 @@ using ArgumentSyntax = Microsoft.CodeAnalysis.CSharp.Syntax.ArgumentSyntax;
 using LiteralExpressionSyntax = Microsoft.CodeAnalysis.CSharp.Syntax.LiteralExpressionSyntax;
 
 namespace FirstOfficer.Generator
-{
-   // [Generator]
+{ 
+    [Generator]
     public class QueryMethodsGenerator : ISourceGenerator
     {
         private static void CreateSource(SourceProductionContext context, Microsoft.CodeAnalysis.Compilation comp, List<string> methodNames)
@@ -39,7 +39,7 @@ namespace FirstOfficer.Generator
         public void Initialize(GeneratorInitializationContext context)
         {
 #if DEBUG
-            //   DebugGenerator.AttachDebugger();
+               DebugGenerator.AttachDebugger();
 #endif
 
             //TODO:diagnostics

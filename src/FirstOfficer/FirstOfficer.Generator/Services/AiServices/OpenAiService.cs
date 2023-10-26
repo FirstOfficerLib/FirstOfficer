@@ -9,7 +9,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace FirstOfficer.Generator.Services.AiServices
 {
-    internal class OpenAiService : IAiService
+    public class OpenAiService : IAiService
     {
 
         private readonly string _key;

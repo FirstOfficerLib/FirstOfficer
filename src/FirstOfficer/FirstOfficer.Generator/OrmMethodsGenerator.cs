@@ -17,7 +17,7 @@ using Microsoft.CSharp;
 
 namespace FirstOfficer.Generator
 {
-    //[Generator]
+    [Generator]
     public class OrmMethodsGenerator : IIncrementalGenerator
     {
         public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -93,9 +93,9 @@ namespace FirstOfficer.Generator
                     BlankLinesBetweenMembers = true
                 });
                 string output = writer.ToString()
-                    .Replace($"class Entity{className}", $"static class Entity{className}"); //hack to make it static
+                    .Replace($"class {className}Entity", $"static class {className}Entity"); //hack to make it static
 
-                context.AddSource($"Entity{className}.g.cs", SyntaxHelper.FormatCode(output));
+                context.AddSource($"{className}Entity.g.cs", SyntaxHelper.FormatCode(output));
 
             }
 
@@ -120,7 +120,7 @@ namespace FirstOfficer.Generator
 
             codeCompileUnit.Namespaces.Add(codeNamespace);
 
-            var codeTypeDeclaration = new CodeTypeDeclaration($"Entity{className}")
+            var codeTypeDeclaration = new CodeTypeDeclaration($"{className}Entity")
             {
                 IsClass = true,
                 IsPartial = false,

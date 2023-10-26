@@ -18,37 +18,31 @@ namespace FirstOfficer.Generator.Services
         {
             var rtn = new List<EntityOrmMapping>();
 
-            foreach (var tree in compilation.SyntaxTrees)
+            var entities = compilation.SyntaxTrees.SelectMany(a=> a.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>())
+                .Where(a => OrmSymbolService.IsEntity(compilation.GetSemanticModel(a.SyntaxTree).GetDeclaredSymbol(a)))
+                .Select(a => compilation.GetSemanticModel(a.SyntaxTree).GetDeclaredSymbol(a)).ToList();
+
+            var dtos = compilation.SyntaxTrees.SelectMany(a => a.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>())
+                .Where(a => IsDto(compilation.GetSemanticModel(a.SyntaxTree).GetDeclaredSymbol(a)))
+                .Select(a => compilation.GetSemanticModel(a.SyntaxTree).GetDeclaredSymbol(a)).ToList();
+
+            foreach (var dto in dtos.Where(a => a is not null && entities
+                         .Where(a => a is not null)
+                         .Select(b => b!.Name).ToArray().Contains(a.Name)))
             {
-                var entities = tree.GetRoot()
-                    .DescendantNodes()
-                    .OfType<ClassDeclarationSyntax>()
-                    .Where(a=> OrmSymbolService.IsEntity(compilation.GetSemanticModel(tree).GetDeclaredSymbol(a)))
-                    .Select(a=> compilation.GetSemanticModel(tree).GetDeclaredSymbol(a)).ToList();
-
-                var dtos = tree.GetRoot()
-                    .DescendantNodes()
-                    .OfType<ClassDeclarationSyntax>()
-                    .Where(a => IsDto(compilation.GetSemanticModel(tree).GetDeclaredSymbol(a)))
-                    .Select(a => compilation.GetSemanticModel(tree).GetDeclaredSymbol(a)).ToList();
-
-                foreach (var dto in dtos.Where(a => a is not null && entities
-                             .Where(a=> a is not null)
-                             .Select(b => b!.Name).ToArray().Contains(a.Name)))
+                var entity = entities.First(a => a!.Name == dto!.Name);
+                if (entity != null && dto != null)
                 {
-                    var entity = entities.First(a => a!.Name == dto!.Name);
-                    if (entity != null && dto != null)
+                    rtn.Add(new EntityOrmMapping
                     {
-                        rtn.Add(new EntityOrmMapping
-                        {
-                            EntitySymbol = entity,
-                            DtoSymbol = dto!,
-                            EntityToDtoPropertyMappings = GetPropertyMappings(entity, dto),
-                            DtoToEntityPropertyMappings = GetPropertyMappings(entity, dto),
-                        });
-                    }
+                        EntitySymbol = entity,
+                        DtoSymbol = dto!,
+                        EntityToDtoPropertyMappings = GetPropertyMappings(entity, dto),
+                        DtoToEntityPropertyMappings = GetPropertyMappings(entity, dto),
+                    });
                 }
             }
+
 
             return rtn;
         }
@@ -81,6 +75,6 @@ namespace FirstOfficer.Generator.Services
             return SymbolService.IsTypeOrImplementsInterface(symbol, "IDto");
         }
 
-      
+
     }
 }

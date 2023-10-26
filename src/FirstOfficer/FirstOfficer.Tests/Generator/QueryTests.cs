@@ -39,19 +39,19 @@ namespace FirstOfficer.Tests.Generator
             await DbConnection.SaveBooks(books, transaction);
             await transaction.CommitAsync();
 
-            var results = (await DbConnection.QueryBooks(null, null, null, new [] { EntityBook.BookOrderBy.IdAsc }, 0, 2)).ToArray();
+            var results = (await DbConnection.QueryBooks(null, null, null, new [] { BookEntity.BookOrderBy.IdAsc }, 0, 2)).ToArray();
 
             Assert.That(results.Count(), Is.EqualTo(2));
             Assert.That(results.First().Title, Is.EqualTo(books.First().Title));
             Assert.That(results.Last().Title, Is.EqualTo(books[1].Title));
 
-            results = (await DbConnection.QueryBooks(null, null, null, new[] { EntityBook.BookOrderBy.IdAsc }, 2, 2)).ToArray();
+            results = (await DbConnection.QueryBooks(null, null, null, new[] { BookEntity.BookOrderBy.IdAsc }, 2, 2)).ToArray();
 
             Assert.That(results.Count(), Is.EqualTo(2));
             Assert.That(results.First().Title, Is.EqualTo(books[2].Title));
             Assert.That(results.Last().Title, Is.EqualTo(books[3].Title));
 
-            results = (await DbConnection.QueryBooks(null, null, null, new[] { EntityBook.BookOrderBy.IdAsc }, 4, 2)).ToArray();
+            results = (await DbConnection.QueryBooks(null, null, null, new[] { BookEntity.BookOrderBy.IdAsc }, 4, 2)).ToArray();
 
             Assert.That(results.Count(), Is.EqualTo(1));
             Assert.That(results.First().Title, Is.EqualTo(books[4].Title));
@@ -89,21 +89,21 @@ namespace FirstOfficer.Tests.Generator
             await transaction.CommitAsync();
 
             var results = (await DbConnection.QueryBooks(null, null, null,
-                new[] { EntityBook.BookOrderBy.TitleDesc })).ToArray();
+                new[] { BookEntity.BookOrderBy.TitleDesc })).ToArray();
 
             Assert.That(results.Count(), Is.EqualTo(5));
             Assert.That(results.First().Title, Is.EqualTo(books.Last().Title));
 
             //test order by title asc
             results = (await DbConnection.QueryBooks(null, null, null,
-                               new[] { EntityBook.BookOrderBy.TitleAsc })).ToArray();       
+                               new[] { BookEntity.BookOrderBy.TitleAsc })).ToArray();       
 
             Assert.That(results.Count(), Is.EqualTo(5));
             Assert.That(results.First().Title, Is.EqualTo(books.First().Title));
             
             //test order by ISBN desc and then title 
             results = (await DbConnection.QueryBooks(null, null, null,
-                                              new[] { EntityBook.BookOrderBy.ISBNDesc, EntityBook.BookOrderBy.TitleAsc })).ToArray();   
+                                              new[] { BookEntity.BookOrderBy.ISBNDesc, BookEntity.BookOrderBy.TitleAsc })).ToArray();   
 
             Assert.That(results.Count(), Is.EqualTo(5));
             Assert.That(results.First().ISBN, Is.EqualTo(books.Last().ISBN));
@@ -151,34 +151,34 @@ namespace FirstOfficer.Tests.Generator
 
             // < Contains
             var results = await DbConnection!.QueryBooks(a => a.Published < Parameter.Value1 && a.Title.Contains(Parameter.Value2),
-                new ParameterValues(DateTime.Now, "TestName"), EntityBook.Includes.None);
+                new ParameterValues(DateTime.Now, "TestName"), BookEntity.Includes.None);
 
             Assert.That(results.Count(), Is.EqualTo(1));
 
 
             // >=
             results = await DbConnection!.QueryBooks(a => a.Published >= Parameter.Value1 && a.Title.Contains(Parameter.Value2),
-                new ParameterValues(DateTime.Now, "TestName"), EntityBook.Includes.None);
+                new ParameterValues(DateTime.Now, "TestName"), BookEntity.Includes.None);
 
             Assert.That(results.Count(), Is.EqualTo(0));
 
 
             // <
             results = await DbConnection!.QueryBooks(a => a.Published < Parameter.Value1,
-                new ParameterValues(DateTime.Now), EntityBook.Includes.None);
+                new ParameterValues(DateTime.Now), BookEntity.Includes.None);
 
             Assert.That(results.Count(), Is.EqualTo(5));
 
             // == Title
             results = (await DbConnection!.QueryBooks(a => a.Title == Parameter.Value1,
-                new ParameterValues(books[2].Title), EntityBook.Includes.None)).ToList();
+                new ParameterValues(books[2].Title), BookEntity.Includes.None)).ToList();
 
             Assert.That(results.Count(), Is.EqualTo(1));
             Assert.That(results.First().Title, Is.EqualTo(books[2].Title));
 
             // == ISBN
             results = (await DbConnection!.QueryBooks(a => a.ISBN == Parameter.Value1,
-                                              new ParameterValues(books[1].ISBN), EntityBook.Includes.None)).ToList();
+                                              new ParameterValues(books[1].ISBN), BookEntity.Includes.None)).ToList();
 
             Assert.That(results.Count(), Is.EqualTo(1));
             Assert.That(results.First().ISBN, Is.EqualTo(books[1].ISBN));
@@ -189,7 +189,7 @@ namespace FirstOfficer.Tests.Generator
                                                            && a.Title == Parameter.Value2
                                                            && a.Published == Parameter.Value3
                                                            && a.Id == Parameter.Value4,
-                new ParameterValues(book3.ISBN, book3.Title, book3.Published, book3.Id), EntityBook.Includes.None)).ToList();
+                new ParameterValues(book3.ISBN, book3.Title, book3.Published, book3.Id), BookEntity.Includes.None)).ToList();
 
             Assert.That(results.Count(), Is.EqualTo(1));
             Assert.That(results.First().ISBN, Is.EqualTo(book3.ISBN));
@@ -201,7 +201,7 @@ namespace FirstOfficer.Tests.Generator
 
             results = (await DbConnection!.QueryBooks(a => (a.ISBN == Parameter.Value1 && a.Title == Parameter.Value2) ||
                                                            (a.Published == Parameter.Value3 && a.Id == Parameter.Value4),
-                      new ParameterValues(books[1].ISBN, books[1].Title, books[4].Published, books[4].Id), EntityBook.Includes.None)).ToList();
+                      new ParameterValues(books[1].ISBN, books[1].Title, books[4].Published, books[4].Id), BookEntity.Includes.None)).ToList();
 
             Assert.That(results.Count(), Is.EqualTo(2));
             Assert.That(results.First().ISBN, Is.EqualTo(books[1].ISBN));

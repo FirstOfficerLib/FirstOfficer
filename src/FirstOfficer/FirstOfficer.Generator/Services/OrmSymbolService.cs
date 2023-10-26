@@ -41,7 +41,7 @@ namespace FirstOfficer.Generator.Services
                 return false;
             }
 
-            return SymbolService.IsTypeOrImplementsInterface(entitySymbol, "IEntity");
+            return !entitySymbol.IsAbstract && SymbolService.IsTypeOrImplementsInterface(entitySymbol, "IEntity");
 
         }
 

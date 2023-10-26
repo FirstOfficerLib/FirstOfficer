@@ -4,7 +4,7 @@ using System.Text;
 
 namespace FirstOfficer.Generator.Services.AiServices
 {
-    internal interface IAiService
+    public interface IAiService
     {
         Task<string> GetSqlFromExpression(string expression);
     }

@@ -13,7 +13,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace FirstOfficer.Generator
 {
-    [Generator]
+   //[Generator]
     public class MapperGenerator : IIncrementalGenerator
     {
         public void Initialize(IncrementalGeneratorInitializationContext context)

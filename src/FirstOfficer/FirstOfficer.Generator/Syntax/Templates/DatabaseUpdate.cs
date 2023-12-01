@@ -62,9 +62,10 @@ namespace FirstOfficer.Generator.Syntax.Templates
                         {string.Join("\r\n", mappedProperties.Where(a => a.Name != "Checksum").Select(prop =>
             {
                 var rtn = string.Empty;
+                var dataType = string.Empty;
 
                 if (((INamedTypeSymbol)prop.Type).FullName() == typeof(DateTime).FullName ||
-                    ((INamedTypeSymbol)prop.Type).FullName() == typeof(DateTime?).FullName)
+                    ((INamedTypeSymbol)prop.Type).FullName() == $"{typeof(DateTime).FullName}?")
                 {
                     //GeneratedHelpers.RoundToNearestMillisecond
 
@@ -72,8 +73,11 @@ namespace FirstOfficer.Generator.Syntax.Templates
                                 ";
                 }
 
-
-                return rtn + $@"command.Parameters.AddWithValue($""{prop.Name}_{{i}}"", {OrmSymbolService.HandleWhenNull(prop)});";
+                if (((INamedTypeSymbol)prop.Type).FullName() == $"{typeof(bool).FullName}?")
+                {
+                    dataType = "NpgsqlTypes.NpgsqlDbType.Boolean, ";
+                }
+                return rtn + $@"command.Parameters.AddWithValue($""{prop.Name}_{{i}}"", {dataType} {OrmSymbolService.HandleWhenNull(prop)});";
             }))}
                         command.Parameters.AddWithValue($""Checksum_{{i}}"", entity.Checksum());
                         command.Parameters.AddWithValue($""Id_{{i}}"", entity.Id);

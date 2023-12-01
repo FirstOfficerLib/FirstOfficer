@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
@@ -10,19 +11,30 @@ namespace FirstOfficer.Generator.Services
 {
     internal static class SymbolService
     {
-        internal static IPropertySymbol[] GetAllProperties(INamedTypeSymbol entitySymbol,
-            List<IPropertySymbol>? props = null!)
-        {
-            props ??= new List<IPropertySymbol>();
-            props.AddRange(entitySymbol.GetMembers().OfType<IPropertySymbol>().Where(a => !a.IsReadOnly));
+        private static ConcurrentDictionary<string, IPropertySymbol[]> _allProperties = new(); 
 
-            //recursive base types
-            if (entitySymbol.BaseType != null)
+        internal static IPropertySymbol[] GetAllProperties(INamedTypeSymbol entitySymbol)
+        {
+            //caching results
+            var key = entitySymbol.FullName();
+            if (_allProperties.TryGetValue(key, out var properties))
             {
-                GetAllProperties(entitySymbol.BaseType, props);
+                return properties;
             }
 
-            return props.ToArray();
+            var symbol = entitySymbol;
+            var props = new List<IPropertySymbol>();
+            do
+            {
+                props.AddRange(symbol.GetMembers().OfType<IPropertySymbol>().Where(a => !a.IsReadOnly));
+                symbol = symbol.BaseType;
+            } while (symbol?.BaseType != null);
+            
+            var rtn = props.ToArray();
+
+            _allProperties.TryAdd(key, rtn);
+
+            return rtn;
         }
 
         internal static bool IsCollection(ITypeSymbol? entitySymbol)

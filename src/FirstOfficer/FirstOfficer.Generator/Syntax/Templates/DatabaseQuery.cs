@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Xml.Linq;
 using FirstOfficer.Generator.Extensions;
 using FirstOfficer.Generator.Helpers;
 using FirstOfficer.Generator.Services;
@@ -198,40 +199,43 @@ namespace FirstOfficer.Generator.Syntax.Templates
                 return;
             }
 
+            var manyToMany = DataHelper.GetManyToMany(symbol).FirstOrDefault(a => a.Value.Item1.Name == propertySymbol.Name || a.Value.Item2.Name == propertySymbol.Name);
+
+            string manyToManyTableName = manyToMany.Key;
+
+            string tableAlias = $"{propertySymbol.Name.ToSnakeCase()}";
+
             var childType = ((INamedTypeSymbol)manyToManyProp.Type).TypeArguments.First();
 
-            var childCols = new List<string>();
-
-            childCols.Add(
-                $@"""{DataHelper.GetTableName(childType.Name)}.id as {DataHelper.GetTableName(childType.Name)}_id """);
+            var childCols = new List<string> { $@"""{tableAlias}.id as {tableAlias}_id """ };
 
             foreach (var prop in OrmSymbolService.GetMappedProperties((INamedTypeSymbol)childType))
             {
                 childCols.Add(
-                    $@"""{DataHelper.GetTableName(childType.Name)}.{prop.Name.ToSnakeCase()} as {DataHelper.GetTableName(childType.Name)}_{prop.Name.ToSnakeCase()} """);
+                    $@"""{tableAlias}.{prop.Name.ToSnakeCase()} as {tableAlias}_{prop.Name.ToSnakeCase()} """);
             }
 
-            var otherProp =
-                OrmSymbolService
-                    .GetManyToManyProperties((INamedTypeSymbol)((INamedTypeSymbol)manyToManyProp.Type).TypeArguments.First())
-                    .First();
-
-            //order properties
-            var orderedProps = new List<IPropertySymbol>() { propertySymbol, otherProp }.OrderBy(a => a.Name).ToArray();
-
-            string manyToManyTableName =
-                DataHelper.GetManyToManyTableName(
-                    ((INamedTypeSymbol)propertySymbol.Type).TypeArguments.First().Name,
-                    otherProp.Name,
-                    ((INamedTypeSymbol)otherProp.Type).TypeArguments.First().Name,
-                    propertySymbol.Name);
+ 
 
             sb.AppendLine($"cols.AddRange(new[] {{ {string.Join(", ", childCols)} }});");
 
+            var parentName = manyToMany.Value.Item1.Name;
+            var childName = manyToMany.Value.Item2.Name;
+
+            if (((INamedTypeSymbol)((INamedTypeSymbol)manyToMany.Value.Item2.Type).TypeArguments[0]).FullName() == symbol.FullName())
+            {
+                parentName = manyToMany.Value.Item2.Name;
+                childName = manyToMany.Value.Item1.Name;
+            }
+
+            var parentColumnIdName = Data.DataHelper.GetIdColumnName(parentName);
+            var childColumnIdName = Data.DataHelper.GetIdColumnName(childName);
+            childColumnIdName = Data.DataHelper.GetIdColumnName(childName, parentColumnIdName == childColumnIdName); // handle many-to-many with self
+
             sb.AppendLine(
-                $" joins += \" LEFT OUTER JOIN {manyToManyTableName} ON {DataHelper.GetTableName(symbol.Name)}.id = {manyToManyTableName}.{symbol.Name.ToSnakeCase()}_id \"; ");
+                $" joins += \" LEFT OUTER JOIN {manyToManyTableName} ON {DataHelper.GetTableName(symbol.Name)}.id = {manyToManyTableName}.{parentColumnIdName} \"; ");
             sb.AppendLine(
-                $" joins += \" LEFT OUTER JOIN {DataHelper.GetTableName(childType.Name)} ON {manyToManyTableName}.{childType.Name.ToSnakeCase()}_id = {DataHelper.GetTableName(childType.Name)}.id  \"; ");
+                $" joins += \" LEFT OUTER JOIN {DataHelper.GetTableName(childType.Name)} {tableAlias} ON {manyToManyTableName}.{childColumnIdName} = {tableAlias}.id  \"; ");
 
         }
     }

@@ -20,8 +20,9 @@ namespace FirstOfficer.Generator.Services
 
         internal static IPropertySymbol[] GetOrderByProperties(INamedTypeSymbol entitySymbol)
         {
-            return SymbolService.GetAllProperties(entitySymbol)
-                .Where(a => a.GetAttributes().Any(b => b.AttributeClass?.Name == "OrderByAttribute")).ToArray();
+             var props = SymbolService.GetAllProperties(entitySymbol);
+
+                return props.Where(a => a.GetAttributes().Any(b => b.AttributeClass?.Name == "OrderByAttribute")).ToArray();
         }
 
         internal static IPropertySymbol[] GetFlagProperties(INamedTypeSymbol entitySymbol)
@@ -83,8 +84,6 @@ namespace FirstOfficer.Generator.Services
 
         internal static IPropertySymbol[] GetManyToManyProperties(INamedTypeSymbol entitySymbol)
         {
-
-
             return SymbolService.GetAllProperties(entitySymbol).Where(a =>
                     a.Type is INamedTypeSymbol symbol &&
                     SymbolService.IsCollection(symbol) &&

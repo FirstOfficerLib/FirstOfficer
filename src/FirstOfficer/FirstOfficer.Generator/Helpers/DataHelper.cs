@@ -46,17 +46,7 @@ namespace FirstOfficer.Generator.Helpers
                 return "TEXT NULL ";
             return $"VARCHAR({size}) NULL ";
         }
-
-        internal static string GetManyToManyTableName(string type1Name, string prop1Name, string type2Name, string prop2Name)
-        {
-            var names = new List<string>() { $"{type1Name.ToSnakeCase()}_{prop1Name.ToSnakeCase()}", $"{type2Name.ToSnakeCase()}_{prop2Name.ToSnakeCase()}" }
-                .OrderBy(a => a)
-                .ToArray();
-
-            var name = $"many_to_many_{names.First()}__{names.Last()}";
-            return name;
-        }
-
+        
         internal static Dictionary<string, (IPropertySymbol, IPropertySymbol)> GetManyToMany(INamedTypeSymbol entityType)
         {
             var rtn = new Dictionary<string, (IPropertySymbol, IPropertySymbol)>();
@@ -82,7 +72,7 @@ namespace FirstOfficer.Generator.Helpers
                 var typeName1 = ((INamedTypeSymbol)orderedProps.First().Type).TypeArguments[0].Name;
                 var typeName2 = ((INamedTypeSymbol)orderedProps.Last().Type).TypeArguments[0].Name;
                 
-                var name = GetManyToManyTableName(typeName1, prop2.Name,typeName2, prop1.Name);
+                var name = Data.DataHelper.GetManyToManyTableName(typeName1, orderedProps.Last().Name, typeName2, orderedProps.First().Name);
                 
                 if (!rtn.ContainsKey(name))
                 {

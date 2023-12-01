@@ -23,7 +23,7 @@ namespace FirstOfficer.Tests.Generator.Entities
         [TextSize(50)]
         [Queryable]
         [OrderBy]
-        public string ISBN { get; set; }
+        public string? ISBN { get; set; }
         [Column("description")]
         public string Description { get; set; }
         [Column("price")]
@@ -35,9 +35,11 @@ namespace FirstOfficer.Tests.Generator.Entities
         //one to one
         public BookCover? BookCover { get; set; }
         //one to many
-        public ICollection<Page> Pages { get; set; } = new Collection<Page>();
+        public IList<Page> Pages { get; set; } = new List<Page>();
         //many to many
         public IList<Author> Authors { get; set; } = new List<Author>();
+        //many to many to self
+        public IList<Book> RelatedBooks { get; set; } = new List<Book>();
 
     }
 }

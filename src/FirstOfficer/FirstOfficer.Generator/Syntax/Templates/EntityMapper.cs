@@ -73,7 +73,7 @@ namespace FirstOfficer.Generator.Syntax.Templates
         {
             var namedTypeSymbol = ((INamedTypeSymbol)prop.Type).TypeArguments.First();
             return $@"  
-                 if (contains{new Pluralizer().Pluralize(namedTypeSymbol.Name)} && (reader[""{DataHelper.GetTableName(namedTypeSymbol.Name)}_id""] ?? DBNull.Value) != DBNull.Value)
+                 if (contains{prop.Name} && (reader[""{DataHelper.GetTableName(namedTypeSymbol.Name)}_id""] ?? DBNull.Value) != DBNull.Value)
                 {{
                     if(entity.{prop.Name} is null)
                     {{

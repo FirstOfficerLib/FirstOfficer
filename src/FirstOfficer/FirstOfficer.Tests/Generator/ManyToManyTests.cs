@@ -20,6 +20,12 @@ namespace FirstOfficer.Tests.Generator
             var book = await CreateBookWithAuthors();
 
             AssertManyToManySave(new List<Book>() { book }, book.Authors.ToList());
+
+            var readBook = (await DbConnection.QueryBooks(b => b.Id == Parameter.Value1, new ParameterValues(book.Id), BookEntity.Includes.Authors)).First();
+            
+            Assert.That(readBook.Authors.Count(), Is.EqualTo(book.Authors.Count()));
+            Assert.That(readBook.Authors.First().Name, Is.EqualTo(book.Authors.First().Name));
+            Assert.That(readBook.Authors.Last().Email, Is.EqualTo(book.Authors.Last().Email));
             
         }
 
@@ -36,8 +42,31 @@ namespace FirstOfficer.Tests.Generator
             await DbConnection.SaveBook(book, transaction, true);
             await transaction.CommitAsync();
 
+            //saving another book because more than one book is required for the test
+            var book2 = await CreateBookWithAuthors();
             AssertManyToManySave(new List<Book>() { book }, book.Authors.ToList());
 
+            AssertManyToManySave(new List<Book>() { book2 }, book2.Authors.ToList());
+
+        }
+
+        [Test]
+        public async Task ManyToManyRelatedBookTest()
+        {
+            var book = await CreateBookWithAuthors();
+            var relatedBook = await CreateBookWithAuthors();
+
+            book.RelatedBooks.Add(relatedBook);
+            var transaction = await DbConnection.BeginTransactionAsync();
+            await DbConnection.SaveBook(book, transaction, true);
+            await transaction.CommitAsync();
+
+            var readBook = (await DbConnection.QueryBooks(b => b.Id == Parameter.Value1, new ParameterValues(book.Id), BookEntity.Includes.RelatedBooks | BookEntity.Includes.Authors)).First();
+            Assert.That(readBook.RelatedBooks.Count(), Is.EqualTo(1));
+            Assert.That(readBook.RelatedBooks.First().Title, Is.EqualTo(relatedBook.Title));
+            Assert.That(readBook.Authors.Count(), Is.EqualTo(book.Authors.Count()));
+            Assert.That(readBook.Authors.First().Name, Is.EqualTo(book.Authors.First().Name));
+            Assert.That(readBook.Authors.Last().Email, Is.EqualTo(book.Authors.Last().Email));
         }
 
         private async Task<Book> CreateBookWithAuthors()

@@ -26,7 +26,7 @@ using ArgumentSyntax = Microsoft.CodeAnalysis.CSharp.Syntax.ArgumentSyntax;
 using LiteralExpressionSyntax = Microsoft.CodeAnalysis.CSharp.Syntax.LiteralExpressionSyntax;
 
 namespace FirstOfficer.Generator
-{ 
+{
     [Generator]
     public class QueryMethodsGenerator : ISourceGenerator
     {
@@ -39,7 +39,7 @@ namespace FirstOfficer.Generator
         public void Initialize(GeneratorInitializationContext context)
         {
 #if DEBUG
-             //  DebugGenerator.AttachDebugger();
+           //   DebugGenerator.AttachDebugger();
 #endif
 
             //TODO:diagnostics
@@ -104,10 +104,15 @@ namespace FirstOfficer.Generator
                             continue;
                         }
 
-                        var expression = args[0].ToString().Replace("\n", "").Replace("\r", "");
 
+
+                        var expression = args[0].ToString().Replace("\n", "").Replace("\r", "");
                         var key = Data.Query.Helper.GetExpressionKey($"{methodName}-{expression}");
-                        var response = whereKeys.ContainsKey(key) ? whereKeys[key] : (openAiService.GetSqlFromExpression(expression)).Result;
+                        if (whereMethods.ContainsKey(key))
+                        {
+                            continue;
+                        }
+                        var response = whereKeys.TryGetValue(key, out var whereKey) ? whereKey : (openAiService.GetSqlFromExpression(expression)).Result;
                         var tableName = methodName.Replace("Query", "").ToSnakeCase();
                         whereMethods.Add(key, GetWhereClause(tableName, response));
                     }

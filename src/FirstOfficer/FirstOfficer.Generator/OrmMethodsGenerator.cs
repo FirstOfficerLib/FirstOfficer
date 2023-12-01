@@ -25,7 +25,7 @@ namespace FirstOfficer.Generator
         {
 
 #if DEBUG
-            //   DebugGenerator.AttachDebugger();
+              //DebugGenerator.AttachDebugger();
 #endif
 
             //diagnostics

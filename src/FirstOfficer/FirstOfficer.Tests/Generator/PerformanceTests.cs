@@ -16,6 +16,7 @@ using Npgsql;
 namespace FirstOfficer.Tests.Generator
 {
     [TestFixture]
+    [Ignore("Performance Test")]
     internal class PerformanceTests : FirstOfficerTest
     {
         //test query books

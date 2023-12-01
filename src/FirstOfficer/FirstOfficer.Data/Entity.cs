@@ -10,11 +10,11 @@ namespace FirstOfficer.Data
         [Key]
         [Queryable]
         [OrderBy]
-        public long Id { get; set; }
+        public virtual long Id { get; set; }
 
         [TextSize(64)]
         [Column("checksum")]  //for benchmarking for EF Core
         [Queryable]
-        public string Checksum { get; set; }
+        public virtual string Checksum { get; set; }
     }
 }

@@ -141,12 +141,18 @@ namespace FirstOfficer.Tests.Generator
             }
 
             books.First().Title = "dfafsdafas TestNamefsafddd";
+            books.Last().ISBN = null;
 
             var transaction = await DbConnection.BeginTransactionAsync();
 
             await DbConnection.SaveBooks(books, transaction);
             await transaction.CommitAsync();
 
+            // where null  -- coming soon TODO: plankCode
+            var nullResults = await DbConnection!.QueryBooks(a=> a.ISBN == Parameter.Value1,
+                new ParameterValues(null));
+            
+         //   Assert.That(nullResults.Count(), Is.EqualTo(1));
 
 
             // < Contains

@@ -2,7 +2,6 @@
 using FirstOfficer.Generator.Helpers;
 using FirstOfficer.Generator.Services;
 using Microsoft.CodeAnalysis;
-using Pluralize.NET;
 
 namespace FirstOfficer.Generator.Syntax.Templates
 {

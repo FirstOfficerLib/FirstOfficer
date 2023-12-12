@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace FirstOfficer.Generator.Compilation
+﻿namespace FirstOfficer.Generator.Compilation
 {
     internal class FileNameBuilder
     {

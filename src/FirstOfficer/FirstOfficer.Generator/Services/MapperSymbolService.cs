@@ -1,13 +1,7 @@
-﻿using FirstOfficer.Generator.Helpers;
-using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Text;
+﻿using Microsoft.CodeAnalysis;
 using FirstOfficer.Generator.Mapper;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.VisualBasic.Syntax;
 
 namespace FirstOfficer.Generator.Services
 {

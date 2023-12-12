@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using System.Xml.Linq;
 using FirstOfficer.Generator.Extensions;
 using FirstOfficer.Generator.Helpers;
 using FirstOfficer.Generator.Services;

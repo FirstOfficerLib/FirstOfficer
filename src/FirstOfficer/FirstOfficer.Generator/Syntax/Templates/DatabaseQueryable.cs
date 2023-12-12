@@ -1,8 +1,6 @@
 ﻿using System.Text;
-using FirstOfficer.Generator.Extensions;
 using FirstOfficer.Generator.Services;
 using Microsoft.CodeAnalysis;
-using Pluralize.NET;
 
 namespace FirstOfficer.Generator.Syntax.Templates
 {

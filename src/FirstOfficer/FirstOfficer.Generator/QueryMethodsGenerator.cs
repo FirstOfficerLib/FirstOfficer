@@ -1,26 +1,11 @@
-﻿using System.CodeDom;
-using System.CodeDom.Compiler;
-using System.Diagnostics;
-using System.Globalization;
-using System.Net.Mime;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Text;
-using FirstOfficer.Generator.Services.AiServices;
-using FirstOfficer.Generator.Attributes;
-using FirstOfficer.Generator.Diagnostics;
+﻿using System.Text;
 using FirstOfficer.Generator.Extensions;
 using FirstOfficer.Generator.Helpers;
 using FirstOfficer.Generator.Services;
-using FirstOfficer.Generator.StateManagement;
-using FirstOfficer.Generator.Syntax;
-using FirstOfficer.Generator.Syntax.Templates;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Text;
-using Microsoft.CSharp;
 using Pluralize.NET;
 using ArgumentSyntax = Microsoft.CodeAnalysis.CSharp.Syntax.ArgumentSyntax;
 using LiteralExpressionSyntax = Microsoft.CodeAnalysis.CSharp.Syntax.LiteralExpressionSyntax;
@@ -39,9 +24,8 @@ namespace FirstOfficer.Generator
         public void Initialize(GeneratorInitializationContext context)
         {
 #if DEBUG
-           //   DebugGenerator.AttachDebugger();
+             //DebugGenerator.AttachDebugger();
 #endif
-
             //TODO:diagnostics
         }
 
@@ -78,10 +62,11 @@ namespace FirstOfficer.Generator
                 }
             }
 
-            var methodNames = symbols.Select(a => $"Query{new Pluralizer().Pluralize(a.Name)}").ToList();
+            
             var whereMethods = new Dictionary<string, string>();
-            foreach (var methodName in methodNames)
+            foreach (var symbol in symbols)
             {
+                var methodName = $"Query{new Pluralizer().Pluralize(symbol.Name)}";
                 foreach (var compSyntaxTree in comp.SyntaxTrees)
                 {
                     var root = compSyntaxTree.GetRoot();
@@ -104,15 +89,14 @@ namespace FirstOfficer.Generator
                             continue;
                         }
 
-
-
                         var expression = args[0].ToString().Replace("\n", "").Replace("\r", "");
                         var key = Data.Query.Helper.GetExpressionKey($"{methodName}-{expression}");
                         if (whereMethods.ContainsKey(key))
                         {
                             continue;
                         }
-                        var response = whereKeys.TryGetValue(key, out var whereKey) ? whereKey : (openAiService.GetSqlFromExpression(expression)).Result;
+                        var response = whereKeys.TryGetValue(key, out var whereKey) ? whereKey : (openAiService.GetSqlFromExpression(expression, symbol)).Result;
+                        //var response = (openAiService.GetSqlFromExpression(expression, symbol)).Result;
                         var tableName = methodName.Replace("Query", "").ToSnakeCase();
                         whereMethods.Add(key, GetWhereClause(tableName, response));
                     }
@@ -141,6 +125,8 @@ namespace FirstOfficer.Generator
 
         }
 
+ 
+
         private Dictionary<string, string> GetWhereKeys(ClassDeclarationSyntax classDeclarationSyntax)
         {
             var rtn = new List<string>();
@@ -159,6 +145,7 @@ namespace FirstOfficer.Generator
             var rtn = sql.Substring(sql.IndexOf("WHERE", StringComparison.Ordinal));
             rtn = rtn.Replace("\n", " ")
                 .Replace("\r", "")
+                .Replace("```", "")
                 .Replace("Value", "value")
                 .Replace("@value_", "@value")
                 .Replace("the_table.", $"{name}.")

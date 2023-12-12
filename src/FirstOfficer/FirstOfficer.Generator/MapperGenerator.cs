@@ -1,15 +1,8 @@
 ﻿using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Text;
 using FirstOfficer.Generator.Compilation;
 using FirstOfficer.Generator.Diagnostics;
-using FirstOfficer.Generator.Extensions;
 using FirstOfficer.Generator.Services;
 using FirstOfficer.Generator.Syntax.Templates;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace FirstOfficer.Generator
 {

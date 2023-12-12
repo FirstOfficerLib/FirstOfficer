@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Text;
-using FirstOfficer.Generator.Extensions;
+﻿using System.Text;
 using FirstOfficer.Generator.Services;
 using Microsoft.CodeAnalysis;
 

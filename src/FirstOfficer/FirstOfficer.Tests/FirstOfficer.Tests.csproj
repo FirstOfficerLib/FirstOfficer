@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
     <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -22,7 +22,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dapper" Version="2.1.15" />
+    <PackageReference Include="Dapper" Version="2.1.24" />
     <PackageReference Include="Microsoft.CodeAnalysis" Version="4.7.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4">
       <PrivateAssets>all</PrivateAssets>
@@ -70,6 +70,8 @@
 
   <ItemGroup>
     <Folder Include="Generated\" />
+    <Folder Include="Generated\FirstOfficer.Generator\FirstOfficer.Generator.OrmMethodsGenerator\" />
+    <Folder Include="Generated\FirstOfficer.Generator\FirstOfficer.Generator.QueryMethodsGenerator\" />
   </ItemGroup>
 
 </Project>

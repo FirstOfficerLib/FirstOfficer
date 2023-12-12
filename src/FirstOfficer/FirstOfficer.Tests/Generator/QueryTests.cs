@@ -140,31 +140,30 @@ namespace FirstOfficer.Tests.Generator
 
             }
 
-            books.First().Title = "dfafsdafas TestNamefsafddd";
+            books.First().Title = "Changed TestTitle";
             books.Last().ISBN = null;
 
             var transaction = await DbConnection.BeginTransactionAsync();
 
             await DbConnection.SaveBooks(books, transaction);
             await transaction.CommitAsync();
-
-            // where null  -- coming soon TODO: plankCode
-            var nullResults = await DbConnection!.QueryBooks(a=> a.ISBN == Parameter.Value1,
+                     
+            var nullResults = await DbConnection!.QueryBooks(a=> a.ISBN== Parameter.Value1,
                 new ParameterValues(null));
             
-         //   Assert.That(nullResults.Count(), Is.EqualTo(1));
+            Assert.That(nullResults.Count(), Is.EqualTo(1));
 
 
             // < Contains
             var results = await DbConnection!.QueryBooks(a => a.Published < Parameter.Value1 && a.Title.Contains(Parameter.Value2),
-                new ParameterValues(DateTime.Now, "TestName"), BookEntity.Includes.None);
+                new ParameterValues(DateTime.Now, "TestTitle"), BookEntity.Includes.None);
 
             Assert.That(results.Count(), Is.EqualTo(1));
 
 
             // >=
             results = await DbConnection!.QueryBooks(a => a.Published >= Parameter.Value1 && a.Title.Contains(Parameter.Value2),
-                new ParameterValues(DateTime.Now, "TestName"), BookEntity.Includes.None);
+                new ParameterValues(DateTime.Now, "TestTitle"), BookEntity.Includes.None);
 
             Assert.That(results.Count(), Is.EqualTo(0));
 

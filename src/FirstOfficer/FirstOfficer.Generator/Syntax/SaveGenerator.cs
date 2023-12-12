@@ -1,5 +1,4 @@
-﻿using System.CodeDom;
-using System.Text;
+﻿using System.Text;
 using FirstOfficer.Generator.Extensions;
 using FirstOfficer.Generator.Syntax.Templates;
 using Microsoft.CodeAnalysis;

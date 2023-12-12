@@ -1,14 +1,7 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Security.Cryptography;
-using FirstOfficer.Generator.Helpers;
-using System.CodeDom;
-using System.Reflection;
-using Microsoft.CSharp;
-using System.CodeDom.Compiler;
 using FirstOfficer.Generator.Extensions;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;

@@ -1,8 +1,5 @@
 ﻿using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace FirstOfficer.Generator.Helpers
 {

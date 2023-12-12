@@ -1,10 +1,4 @@
-﻿using System.Text;
-using FirstOfficer.Generator.Extensions;
-using FirstOfficer.Generator.Helpers;
-using FirstOfficer.Generator.Mapper;
-using FirstOfficer.Generator.Services;
-using Microsoft.CodeAnalysis;
-using Pluralize.NET;
+﻿using FirstOfficer.Generator.Mapper;
 
 namespace FirstOfficer.Generator.Syntax.Templates
 {

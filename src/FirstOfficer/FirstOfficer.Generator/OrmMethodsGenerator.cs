@@ -1,10 +1,5 @@
-﻿using System.CodeDom;
-using System.CodeDom.Compiler;
-using System.Collections.Immutable;
-using System.Reflection;
-using System.Runtime.Serialization;
+﻿using System.Collections.Immutable;
 using System.Text;
-using System.Xml.Linq;
 using FirstOfficer.Generator.Diagnostics;
 using FirstOfficer.Generator.Helpers;
 using FirstOfficer.Generator.Services;
@@ -14,7 +9,6 @@ using FirstOfficer.Generator.Syntax.Templates;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CSharp;
 
 namespace FirstOfficer.Generator
 {
@@ -25,7 +19,7 @@ namespace FirstOfficer.Generator
         {
 
 #if DEBUG
-              //DebugGenerator.AttachDebugger();
+            //DebugGenerator.AttachDebugger();
 #endif
 
             //diagnostics

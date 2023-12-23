@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FirstOfficer.Data.Query;
 using FirstOfficer.Tests.Generator.Entities;
+#pragma warning disable VSTHRD200
 
 namespace FirstOfficer.Tests.Generator
 {

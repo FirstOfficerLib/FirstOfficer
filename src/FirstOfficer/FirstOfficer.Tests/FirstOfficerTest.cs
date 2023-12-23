@@ -19,6 +19,7 @@ using Npgsql;
 using Pluralize.NET;
 using DotNet.Testcontainers.Containers;
 using Testcontainers.PostgreSql;
+#pragma warning disable VSTHRD200
 
 namespace FirstOfficer.Tests
 {
@@ -88,9 +89,9 @@ namespace FirstOfficer.Tests
                 var sql = @"SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'";
                 var command = DbConnection!.CreateCommand();
                 command.CommandText = sql;
-                var reader = command.ExecuteReader();
+                var reader = await command.ExecuteReaderAsync();
                 tables.Clear();
-                while (reader.Read())
+                while (await reader.ReadAsync())
                 {
                     tables.Add(reader.GetString(0));
                 }
@@ -103,7 +104,7 @@ namespace FirstOfficer.Tests
                     command.CommandText = sql;
                     try
                     {
-                        command.ExecuteNonQuery();
+                        await command.ExecuteNonQueryAsync();
                     }
                     catch
                     {

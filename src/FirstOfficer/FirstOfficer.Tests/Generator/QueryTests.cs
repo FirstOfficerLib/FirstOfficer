@@ -9,6 +9,7 @@ using FirstOfficer.Data;
 using FirstOfficer.Data.Query;
 using FirstOfficer.Tests.Generator.Entities;
 using Npgsql;
+#pragma warning disable VSTHRD200
 
 namespace FirstOfficer.Tests.Generator
 {
@@ -60,7 +61,7 @@ namespace FirstOfficer.Tests.Generator
             var sql = $"DELETE FROM {DataHelper.GetTableName<Book>()};";
             var command = DbConnection.CreateCommand();
             command.CommandText = sql;
-            command.ExecuteNonQuery();
+            await command.ExecuteNonQueryAsync();
             command.Dispose();
             await transaction.DisposeAsync();
         }
@@ -114,7 +115,7 @@ namespace FirstOfficer.Tests.Generator
             var sql = $"DELETE FROM {DataHelper.GetTableName<Book>()};";
             var command = DbConnection.CreateCommand();
             command.CommandText = sql;
-            command.ExecuteNonQuery();
+            await command.ExecuteNonQueryAsync();
             command.Dispose();
             await transaction.DisposeAsync();
 
@@ -215,38 +216,13 @@ namespace FirstOfficer.Tests.Generator
             Assert.That(results.Last().Published, Is.EqualTo(books[4].Published));
             Assert.That(results.Last().Id, Is.EqualTo(books[4].Id));
 
-            await AddBooks();
-
+          
             var sql = $"DELETE FROM {DataHelper.GetTableName<Book>()};";
             var command = DbConnection.CreateCommand();
             command.CommandText = sql;
-            command.ExecuteNonQuery();
+            await command.ExecuteNonQueryAsync();
             command.Dispose();
             await transaction.DisposeAsync();
-        }
-
-        private async Task AddBooks()
-        {
-
-            var bookCount = 100000;
-            var books = new List<Book>();
-            for (int i = 0; i < bookCount; i++)
-            {
-                books.Add(new Book()
-                {
-                    Description = string.Empty.RandomString(100),
-                    ISBN = string.Empty.RandomString(10),
-                    Published = DateTime.Now,
-                    Title = string.Empty.RandomString(10)
-                });
-
-            }
-
-            var transaction = await DbConnection.BeginTransactionAsync();
-
-            await DbConnection.SaveBooks(books, transaction);
-
-            await transaction.CommitAsync();
         }
     }
 

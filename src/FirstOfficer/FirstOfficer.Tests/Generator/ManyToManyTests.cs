@@ -8,6 +8,7 @@ using FirstOfficer.Data.Query;
 using FirstOfficer.Data.Exceptions;
 using FirstOfficer.Tests.Generator.Entities;
 using NUnit.Framework.Internal;
+#pragma warning disable VSTHRD200
 
 namespace FirstOfficer.Tests.Generator
 {

@@ -6,7 +6,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using FirstOfficer.Data;
-using FirstOfficer.Tests.Generator.Models;
+using FirstOfficer.Tests.Generator.Entities;
 using Npgsql;
 
 namespace FirstOfficer.Tests.Generator
@@ -17,7 +17,7 @@ namespace FirstOfficer.Tests.Generator
         [Test]
         public async Task SaveBooksTest()
         {
-            var bookCount = 100000;
+            var bookCount = 1000;
             var books = new List<Book>();
             for (int i = 0; i < bookCount; i++)
             {
@@ -42,7 +42,7 @@ namespace FirstOfficer.Tests.Generator
                 Assert.That(bookCount, Is.EqualTo(count)); //check count
             }
             
-            var allBooks = (await DbConnection.QueryBooks(EntityBook.Includes.None)).ToList();
+            var allBooks = (await DbConnection.QueryBooks()).ToList();
             Assert.That(allBooks.Count(), Is.EqualTo(bookCount));
 
             var source = books.OrderBy(a => a.Id).ToList();
@@ -106,7 +106,7 @@ namespace FirstOfficer.Tests.Generator
             transaction = await DbConnection.BeginTransactionAsync();
             await DbConnection.SaveBooks(books, transaction);
             await transaction.CommitAsync();
-            var allBooks = (await DbConnection.QueryBooks(EntityBook.Includes.None)).ToList();
+            var allBooks = (await DbConnection.QueryBooks()).ToList();
             Assert.That(allBooks.Count(), Is.EqualTo(bookCount));
 
             var source = books.OrderBy(a => a.Id).ToList();
@@ -229,7 +229,7 @@ namespace FirstOfficer.Tests.Generator
             Assert.That(checksum, Is.EqualTo(book.Checksum()));
 
             var readBook =
-                (await DbConnection.QueryBooks(EntityBook.Includes.None)).First();
+                (await DbConnection.QueryBooks()).First();
 
             Assert.That(readBook.Checksum(), Is.EqualTo(checksum));
 

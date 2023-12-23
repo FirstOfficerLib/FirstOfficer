@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Reflection;
-using FirstOfficer.Core.Extensions;
+using FirstOfficer.Data.Extensions;
 using Pluralize.NET;
 
 namespace FirstOfficer.Data
@@ -28,9 +28,19 @@ namespace FirstOfficer.Data
             return rtn;
         }
 
-        public static string GetIdColumnName(PropertyInfo propertyInfo)
+        public static string GetIdColumnName(PropertyInfo propertyInfo, bool isTwo = false)
         {
-            return $"{new Pluralizer().Singularize(propertyInfo.Name)}Id".ToSnakeCase();
+            return GetIdColumnName(propertyInfo.Name, isTwo);
+        }
+
+        public static string GetIdColumnName(string propertyName, bool isTwo = false)
+        {
+            if (isTwo)
+            {
+                return $"{new Pluralizer().Singularize(propertyName)}_2_Id".ToSnakeCase();
+            }
+
+            return $"{new Pluralizer().Singularize(propertyName)}Id".ToSnakeCase();
         }
 
         public static string GetTableName<T>()

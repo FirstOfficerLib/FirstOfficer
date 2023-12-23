@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using FirstOfficer.Generator.Extensions;
 using FirstOfficer.Generator.Helpers;
+using FirstOfficer.Generator.Services;
 using Microsoft.CodeAnalysis;
 using Pluralize.NET;
 
@@ -12,9 +13,9 @@ namespace FirstOfficer.Generator.Syntax.Templates
         internal static string GetTemplate(INamedTypeSymbol entitySymbol)
         {
             var sb = new StringBuilder();
-            var oneToOnes = CodeAnalysisHelper.GetOneToOneProperties(entitySymbol).ToArray();
-            var oneToMany = CodeAnalysisHelper.GetOneToManyProperties(entitySymbol).ToArray();
-            var properties = CodeAnalysisHelper.GetMappedProperties(entitySymbol).ToArray();
+            var oneToOnes = OrmSymbolService.GetOneToOneProperties(entitySymbol).ToArray();
+            var oneToMany = OrmSymbolService.GetOneToManyProperties(entitySymbol).ToArray();
+            var properties = OrmSymbolService.GetMappedProperties(entitySymbol).ToArray();
             var name = entitySymbol.Name;
 
             sb.AppendLine($@"
@@ -76,7 +77,7 @@ namespace FirstOfficer.Generator.Syntax.Templates
 
             sb.AppendLine($@" }}");
 
-            var manyToManyTypes = CodeAnalysisHelper.GetManyToManyProperties(entitySymbol).ToArray();
+            var manyToManyTypes = OrmSymbolService.GetManyToManyProperties(entitySymbol).ToArray();
 
             var manyToMany = DataHelper.GetManyToMany(entitySymbol);
 
@@ -84,6 +85,8 @@ namespace FirstOfficer.Generator.Syntax.Templates
                                     IEnumerable<{entitySymbol.FullName()}> entities, IDbTransaction transaction)
                     {{
                     ");
+
+            var i = 0;
             foreach (var manyToManyProperty in manyToMany)
             {
                 var tableName = manyToManyProperty.Key;
@@ -91,26 +94,27 @@ namespace FirstOfficer.Generator.Syntax.Templates
                     SymbolEqualityComparer.Default.Equals((manyToManyProperty.Value.Item1.Type as INamedTypeSymbol)?.TypeArguments[0], entitySymbol);
                 var prop1 = prop1IsEntity ? manyToManyProperty.Value.Item1 : manyToManyProperty.Value.Item2;
                 var type1 = (prop1.Type as INamedTypeSymbol)?.TypeArguments[0];
-                var idName1 = $"{type1.Name.ToSnakeCase()}_id";
+                var idName1 = Data.DataHelper.GetIdColumnName(prop1.Name);
                 var prop2 = prop1IsEntity ? manyToManyProperty.Value.Item2 : manyToManyProperty.Value.Item1;
                 var type2 = (prop2.Type as INamedTypeSymbol)?.TypeArguments[0];
-                var idName2 = $"{type2.Name.ToSnakeCase()}_id";
-               
-   
-                sb.AppendLine($"await dbConnection.Save{new Pluralizer().Pluralize(type2.Name)}(entities.SelectMany(a=> a.{prop2.Name}), transaction);");
+                var idName2 = Data.DataHelper.GetIdColumnName(prop2.Name);
+                idName2 = Data.DataHelper.GetIdColumnName(prop2.Name, idName1 == idName2);  //handle many-to-many to self
 
-                sb.AppendLine($@"      //handle many-to-many
-                                var pairs = entities
+                sb.AppendLine($" await dbConnection.Save{new Pluralizer().Pluralize(type2.Name)}(entities.SelectMany(a=> a.{prop2.Name}), transaction);");
+
+                sb.AppendLine($@"      
+                        //handle many-to-many
+                                var pairs{i} = entities
                                     .SelectMany(a => a.{prop2.Name},
                                         (b, c) => new KeyValuePair<long, long>(b.Id, c.Id)).ToList();
 
 
-                        var pairs1 = pairs.Select(p => p.Key).ToArray();
-                        var pairs2 = pairs.Select(p => p.Value).ToArray();
+                        var pairs1{i} = pairs{i}.Select(p => p.Key).ToArray();
+                        var pairs2{i} = pairs{i}.Select(p => p.Value).ToArray();
 
 
                         //handle insert
-                    string insertSql = @""
+                    string insertSql{i} = @""
                         WITH input_pairs AS (
                             SELECT UNNEST(@a::bigint[]) AS col1, UNNEST(@b::bigint[]) AS col2
                         )
@@ -121,25 +125,29 @@ namespace FirstOfficer.Generator.Syntax.Templates
                         WHERE ba.{idName1} IS NULL AND ba.{idName2} IS NULL;
                 "";
 
-                    using var insertCommand = new NpgsqlCommand(insertSql, dbConnection as NpgsqlConnection, transaction as NpgsqlTransaction);
-                    insertCommand.Parameters.AddWithValue(""a"", pairs1);
-                    insertCommand.Parameters.AddWithValue(""b"", pairs2);
-                    insertCommand.ExecuteNonQuery();
+                    using var insertCommand{i} = new NpgsqlCommand(insertSql{i}, dbConnection as NpgsqlConnection, transaction as NpgsqlTransaction);
+                    insertCommand{i}.Parameters.AddWithValue(""a"", pairs1{i});
+                    insertCommand{i}.Parameters.AddWithValue(""b"", pairs2{i});
+                    insertCommand{i}.ExecuteNonQuery();
 
                     //handle delete
-                    string deleteSql = @""
+                    string deleteSql{i} = @""
                                 WITH input_pairs AS (
-                                    SELECT UNNEST(@a::int[]) AS col1, UNNEST(@b::int[]) AS col2
+                                    SELECT UNNEST(@a::bigint[]) AS col1, UNNEST(@b::bigint[]) AS col2
                                 )
                                 DELETE FROM {tableName} 
-                                WHERE ({idName1}, {idName2}) NOT IN (SELECT col1, col2 FROM input_pairs);
+                                WHERE {idName1} = ANY(@c::bigint[]) AND ({idName1}, {idName2}) NOT IN (SELECT col1, col2 FROM input_pairs);
                             "";
-                    using var deleteCommand = new NpgsqlCommand(deleteSql, dbConnection as NpgsqlConnection, transaction as NpgsqlTransaction);
-                    deleteCommand.Parameters.AddWithValue(""a"", pairs1);
-                    deleteCommand.Parameters.AddWithValue(""b"", pairs2);
-                    deleteCommand.ExecuteNonQuery();
+                    using var deleteCommand{i} = new NpgsqlCommand(deleteSql{i}, dbConnection as NpgsqlConnection, transaction as NpgsqlTransaction);
+                    deleteCommand{i}.Parameters.AddWithValue(""a"", pairs1{i});
+                    deleteCommand{i}.Parameters.AddWithValue(""b"", pairs2{i});
+                    deleteCommand{i}.Parameters.AddWithValue(""c"", pairs1{i}.Distinct().ToArray());
+                    deleteCommand{i}.ExecuteNonQuery();
+
 
                 ");
+
+                i++;
             }
 
             sb.AppendLine($@"}}");

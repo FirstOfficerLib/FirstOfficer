@@ -1,7 +1,5 @@
-﻿using System.Collections;
-using System.Text;
-using FirstOfficer.Generator.Extensions;
-using FirstOfficer.Generator.Helpers;
+﻿using System.Text;
+using FirstOfficer.Generator.Services;
 using Microsoft.CodeAnalysis;
 
 namespace FirstOfficer.Generator.Syntax.Templates
@@ -11,12 +9,7 @@ namespace FirstOfficer.Generator.Syntax.Templates
 
         internal static string GetTemplate(INamedTypeSymbol entitySymbol)
         {
-            var valueProperties = CodeAnalysisHelper.GetFlagProperties(entitySymbol);
-
-            if (valueProperties.Length == 0)
-            {
-                return string.Empty;
-            }
+            var valueProperties = OrmSymbolService.GetFlagProperties(entitySymbol);
 
             var values = new StringBuilder();
             var i = 1;

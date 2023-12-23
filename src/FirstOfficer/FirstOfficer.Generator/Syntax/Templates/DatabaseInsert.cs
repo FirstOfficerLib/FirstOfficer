@@ -1,7 +1,7 @@
 ﻿using FirstOfficer.Generator.Extensions;
 using FirstOfficer.Generator.Helpers;
+using FirstOfficer.Generator.Services;
 using Microsoft.CodeAnalysis;
-using Pluralize.NET;
 
 namespace FirstOfficer.Generator.Syntax.Templates
 {
@@ -11,9 +11,9 @@ namespace FirstOfficer.Generator.Syntax.Templates
         internal static string GetTemplate(INamedTypeSymbol entitySymbol)
         {
             var entityName = entitySymbol.Name;
-            var properties = CodeAnalysisHelper.GetMappedProperties(entitySymbol).ToArray();
-            var columnProperties = CodeAnalysisHelper.GetMappedProperties(entitySymbol).Select(a => a.Name.ToSnakeCase()).ToArray();
-            var valueProperties = CodeAnalysisHelper.GetMappedProperties(entitySymbol).Select(p => p.Name).ToArray();
+            var properties = OrmSymbolService.GetMappedProperties(entitySymbol).ToArray();
+            var columnProperties = OrmSymbolService.GetMappedProperties(entitySymbol).Select(a => a.Name.ToSnakeCase()).ToArray();
+            var valueProperties = OrmSymbolService.GetMappedProperties(entitySymbol).Select(p => p.Name).ToArray();
           
 
             var rtn = $@"
@@ -51,7 +51,7 @@ namespace FirstOfficer.Generator.Syntax.Templates
                                 ";
                 }
 
-                rtn += $@"command.Parameters.AddWithValue($""@{prop.Name}_{{i}}"", {CodeAnalysisHelper.HandleWhenNull(prop)});
+                rtn += $@"command.Parameters.AddWithValue($""@{prop.Name}_{{i}}"", {OrmSymbolService.HandleWhenNull(prop)});
                                       ";
 
             }

@@ -1,5 +1,5 @@
 ﻿using FirstOfficer.Generator.Extensions;
-using FirstOfficer.Generator.Helpers;
+using FirstOfficer.Generator.Services;
 using Microsoft.CodeAnalysis;
 
 namespace FirstOfficer.Generator.Syntax.Templates
@@ -9,7 +9,7 @@ namespace FirstOfficer.Generator.Syntax.Templates
 
         internal static string GetTemplate(INamedTypeSymbol entitySymbol)
         {
-            var valueProperties = CodeAnalysisHelper.GetMappedProperties(entitySymbol)
+            var valueProperties = OrmSymbolService.GetMappedProperties(entitySymbol)
                 .Where(a=> a.Name != "Checksum")
                 .OrderBy(a=> a.Name)
                 .ToArray();

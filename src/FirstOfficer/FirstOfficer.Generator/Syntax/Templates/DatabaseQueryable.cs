@@ -1,8 +1,6 @@
 ﻿using System.Text;
-using FirstOfficer.Generator.Extensions;
-using FirstOfficer.Generator.Helpers;
+using FirstOfficer.Generator.Services;
 using Microsoft.CodeAnalysis;
-using Pluralize.NET;
 
 namespace FirstOfficer.Generator.Syntax.Templates
 {
@@ -12,7 +10,7 @@ namespace FirstOfficer.Generator.Syntax.Templates
         internal static string GetTemplate(INamedTypeSymbol symbol)
         {
             var sb = new StringBuilder();
-            var props = CodeAnalysisHelper.GetQueryableProperties(symbol);
+            var props = OrmSymbolService.GetQueryableProperties(symbol);
 
             var name = symbol.Name;
             sb.Append($@"
@@ -29,6 +27,17 @@ namespace FirstOfficer.Generator.Syntax.Templates
 
          
 ");
+
+            sb.AppendLine($@"  public enum {name}OrderBy
+        {{");
+
+            foreach (var prop in OrmSymbolService.GetOrderByProperties(symbol))
+            {
+                sb.AppendLine($"{prop.Name}Asc,");
+                sb.AppendLine($"{prop.Name}Desc,");
+            }
+
+            sb.AppendLine(" }");
 
 
             return sb.ToString();

@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using System.Data;
-using System.Linq;
 using System.Reflection;
 using System.Text;
-using FirstOfficer.Core.Extensions;
+using FirstOfficer.Data;
 using FirstOfficer.Data.Attributes;
+using FirstOfficer.Generator.Extensions;
 using Microsoft.Extensions.Logging;
 using Npgsql;
-using Pluralize.NET;
 
-
-namespace FirstOfficer.Data
+namespace FirstOffice.Npgsql
 {
     public class PostgresDatabaseBuilder : IDatabaseBuilder
     {
@@ -66,7 +62,7 @@ namespace FirstOfficer.Data
 
                     AddColumn(tableName, pi);
                 }
-                
+
             }
 
             AddForeignKeys(entityTypes);
@@ -83,7 +79,17 @@ namespace FirstOfficer.Data
 
             foreach (var props in manyToMany)
             {
-                CreateManyTable(props.Key, DataHelper.GetIdColumnName(props.Value.Item1), DataHelper.GetIdColumnName(props.Value.Item2));
+                if (GetColumnInfo(props.Key).Any())
+                {
+                    continue;
+                }
+
+                var colName1 = DataHelper.GetIdColumnName(props.Value.Item1);
+                var colName2 = DataHelper.GetIdColumnName(props.Value.Item2);
+
+                colName2 = DataHelper.GetIdColumnName(props.Value.Item2, colName1 == colName2);  // handle case where both sides of many to many are the same type
+
+                CreateManyTable(props.Key, colName1, colName2);
                 AddManyForeignKey(props.Value.Item1, props.Key);
                 AddManyForeignKey(props.Value.Item2, props.Key);
             }
@@ -109,11 +115,6 @@ namespace FirstOfficer.Data
             {
                 foreach (var type2 in entityTypes)
                 {
-                    if (type1 == type2)
-                    {
-                        continue;
-                    }
-
                     var props = type1.GetProperties().Where(a =>
                         a.PropertyType.GenericTypeArguments.Any() && a.PropertyType.GenericTypeArguments[0] == type2).ToList();
 
@@ -206,7 +207,7 @@ namespace FirstOfficer.Data
             WriteFk(fkName, tableName, colName, fkTableName);
 
         }
-        
+
         private void AddForeignKeys(List<Type> entityTypes)
         {
             foreach (var entityType in entityTypes)
@@ -214,7 +215,7 @@ namespace FirstOfficer.Data
                 var tableName = DataHelper.GetTableName(entityType);
                 var allTables = entityTypes.Select(a => a.Name).ToList();
                 var props = entityType.GetProperties().ToList();
-                foreach (var prop in props.Where(p =>                             
+                foreach (var prop in props.Where(p =>
                              p.Name.EndsWith("Id") && allTables.Contains(p.Name.Substring(0, p.Name.Length - 2))))
                 {
                     //add foreign key
@@ -242,11 +243,11 @@ namespace FirstOfficer.Data
 
                 sql = $@"ALTER TABLE {tableName}
                                 ADD CONSTRAINT {fkName}
-                                FOREIGN KEY ({colName}) REFERENCES {fkTableName}(id);";
+                                FOREIGN KEY ({colName}) REFERENCES {fkTableName}(id) ON DELETE CASCADE;";
                 _connection.Execute(sql);
             }
         }
-        
+
         private void AddColumn(string tableName, PropertyInfo pi)
         {
 
@@ -277,7 +278,10 @@ namespace FirstOfficer.Data
         private List<ColumnInfo> GetColumnInfo(Type type)
         {
             var tableName = DataHelper.GetTableName(type);
-
+            return GetColumnInfo(tableName);
+        }
+        private List<ColumnInfo> GetColumnInfo(string tableName)
+        {
             using (var command = _connection.CreateCommand())
             {
                 command.CommandText =

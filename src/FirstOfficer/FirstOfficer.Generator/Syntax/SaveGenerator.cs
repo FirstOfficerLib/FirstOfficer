@@ -1,5 +1,4 @@
-﻿using System.CodeDom;
-using System.Text;
+﻿using System.Text;
 using FirstOfficer.Generator.Extensions;
 using FirstOfficer.Generator.Syntax.Templates;
 using Microsoft.CodeAnalysis;
@@ -9,7 +8,7 @@ namespace FirstOfficer.Generator.Syntax
 {
     internal static class SaveGenerator
     {
-        internal static CodeSnippetTypeMember GenerateSaveMethods(INamedTypeSymbol entitySymbol)
+        internal static string GenerateSaveMethods(INamedTypeSymbol entitySymbol)
         {
             string unformattedCode = string.Empty;
 
@@ -62,7 +61,7 @@ namespace FirstOfficer.Generator.Syntax
             unformattedCode += bodyBuilder.ToString();
 
 
-            return new CodeSnippetTypeMember(unformattedCode);
+            return unformattedCode;
         }
 
     }

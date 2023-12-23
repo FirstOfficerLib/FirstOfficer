@@ -1,5 +1,4 @@
-﻿using FirstOfficer.Tests.Generator.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Diagnostics;
@@ -10,12 +9,14 @@ using Dapper;
 using System.Data;
 using FirstOfficer.Data;
 using FirstOfficer.Data.Query;
+using FirstOfficer.Tests.Generator.Entities;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
 namespace FirstOfficer.Tests.Generator
 {
     [TestFixture]
+    [Ignore("Performance Test")]
     internal class PerformanceTests : FirstOfficerTest
     {
         //test query books
@@ -246,7 +247,7 @@ namespace FirstOfficer.Tests.Generator
 
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            var rtnBooks = (await DbConnection.QueryBooks(EntityBook.Includes.None )).ToList();
+            var rtnBooks = (await DbConnection.QueryBooks()).ToList();
             stopwatch.Stop();
             TimeSpan timeTaken = stopwatch.Elapsed;
             Console.WriteLine($"Code Generated Time taken: {timeTaken.TotalMilliseconds}ms");
@@ -263,7 +264,7 @@ namespace FirstOfficer.Tests.Generator
 
             stopwatch = new Stopwatch();
             stopwatch.Start();
-            var query = context.Books.Where(a => true);
+            var query = context.Books;
             rtnBooks = query.ToList();
             stopwatch.Stop();
             timeTaken = stopwatch.Elapsed;

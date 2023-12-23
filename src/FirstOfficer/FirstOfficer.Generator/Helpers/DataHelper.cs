@@ -1,7 +1,7 @@
 ﻿using FirstOfficer.Generator.Extensions;
+using FirstOfficer.Generator.Services;
 using Microsoft.CodeAnalysis;
 using Pluralize.NET;
-using System.Reflection;
 
 namespace FirstOfficer.Generator.Helpers
 {
@@ -45,22 +45,12 @@ namespace FirstOfficer.Generator.Helpers
                 return "TEXT NULL ";
             return $"VARCHAR({size}) NULL ";
         }
-
-        internal static string GetManyToManyTableName(string type1Name, string prop1Name, string type2Name, string prop2Name)
-        {
-            var names = new List<string>() { $"{type1Name.ToSnakeCase()}_{prop1Name.ToSnakeCase()}", $"{type2Name.ToSnakeCase()}_{prop2Name.ToSnakeCase()}" }
-                .OrderBy(a => a)
-                .ToArray();
-
-            var name = $"many_to_many_{names.First()}__{names.Last()}";
-            return name;
-        }
-
+        
         internal static Dictionary<string, (IPropertySymbol, IPropertySymbol)> GetManyToMany(INamedTypeSymbol entityType)
         {
             var rtn = new Dictionary<string, (IPropertySymbol, IPropertySymbol)>();
 
-            var props = CodeAnalysisHelper.GetManyToManyProperties(entityType);
+            var props = OrmSymbolService.GetManyToManyProperties(entityType);
 
             foreach (var prop1 in props)
             {
@@ -69,7 +59,7 @@ namespace FirstOfficer.Generator.Helpers
                     continue;
                 }
 
-                var prop2 = CodeAnalysisHelper.GetManyToManyProperties(type1).FirstOrDefault(a => 
+                var prop2 = OrmSymbolService.GetManyToManyProperties(type1).FirstOrDefault(a => 
                         a.Type is INamedTypeSymbol symbol &&
                         SymbolEqualityComparer.Default.Equals(symbol.TypeArguments[0],entityType));
                 if (prop2 == null)
@@ -81,7 +71,7 @@ namespace FirstOfficer.Generator.Helpers
                 var typeName1 = ((INamedTypeSymbol)orderedProps.First().Type).TypeArguments[0].Name;
                 var typeName2 = ((INamedTypeSymbol)orderedProps.Last().Type).TypeArguments[0].Name;
                 
-                var name = GetManyToManyTableName(typeName1, prop2.Name,typeName2, prop1.Name);
+                var name = Data.DataHelper.GetManyToManyTableName(typeName1, orderedProps.Last().Name, typeName2, orderedProps.First().Name);
                 
                 if (!rtn.ContainsKey(name))
                 {

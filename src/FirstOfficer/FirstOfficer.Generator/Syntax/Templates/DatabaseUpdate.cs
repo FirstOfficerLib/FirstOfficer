@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using FirstOfficer.Generator.Extensions;
 using FirstOfficer.Generator.Helpers;
+using FirstOfficer.Generator.Services;
 using Microsoft.CodeAnalysis;
 
 namespace FirstOfficer.Generator.Syntax.Templates
@@ -13,10 +14,10 @@ namespace FirstOfficer.Generator.Syntax.Templates
 
             var entityName = entitySymbol.Name;
 
-            var mappedProperties = CodeAnalysisHelper.GetMappedProperties(entitySymbol).ToArray();
+            var mappedProperties = OrmSymbolService.GetMappedProperties(entitySymbol).ToArray();
 
-            var columnProperties = CodeAnalysisHelper.GetMappedProperties(entitySymbol).Select(a => a.Name.ToSnakeCase()).OrderBy(a => a).ToArray();
-            var properties = CodeAnalysisHelper.GetMappedProperties(entitySymbol).Select(a => a.Name).OrderBy(a => a).ToArray();
+            var columnProperties = OrmSymbolService.GetMappedProperties(entitySymbol).Select(a => a.Name.ToSnakeCase()).OrderBy(a => a).ToArray();
+            var properties = OrmSymbolService.GetMappedProperties(entitySymbol).Select(a => a.Name).OrderBy(a => a).ToArray();
 
             var valueProperties = new List<string>() { "Id" };
             valueProperties.AddRange(properties);
@@ -61,9 +62,10 @@ namespace FirstOfficer.Generator.Syntax.Templates
                         {string.Join("\r\n", mappedProperties.Where(a => a.Name != "Checksum").Select(prop =>
             {
                 var rtn = string.Empty;
+                var dataType = string.Empty;
 
                 if (((INamedTypeSymbol)prop.Type).FullName() == typeof(DateTime).FullName ||
-                    ((INamedTypeSymbol)prop.Type).FullName() == typeof(DateTime?).FullName)
+                    ((INamedTypeSymbol)prop.Type).FullName() == $"{typeof(DateTime).FullName}?")
                 {
                     //GeneratedHelpers.RoundToNearestMillisecond
 
@@ -71,8 +73,11 @@ namespace FirstOfficer.Generator.Syntax.Templates
                                 ";
                 }
 
-
-                return rtn + $@"command.Parameters.AddWithValue($""{prop.Name}_{{i}}"", {CodeAnalysisHelper.HandleWhenNull(prop)});";
+                if (((INamedTypeSymbol)prop.Type).FullName() == $"{typeof(bool).FullName}?")
+                {
+                    dataType = "NpgsqlTypes.NpgsqlDbType.Boolean, ";
+                }
+                return rtn + $@"command.Parameters.AddWithValue($""{prop.Name}_{{i}}"", {dataType} {OrmSymbolService.HandleWhenNull(prop)});";
             }))}
                         command.Parameters.AddWithValue($""Checksum_{{i}}"", entity.Checksum());
                         command.Parameters.AddWithValue($""Id_{{i}}"", entity.Id);

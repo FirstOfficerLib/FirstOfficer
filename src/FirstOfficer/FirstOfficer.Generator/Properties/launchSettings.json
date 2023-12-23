@@ -2,7 +2,7 @@
   "profiles": {
     "Roslyn": {
       "commandName": "DebugRoslynComponent",
-      "targetProject": "..\\..\\Cedar\\Cedar.Models\\Cedar.Models.csproj"
+      "targetProject": "..\\..\\Compost\\Compost.Crawler\\Compost.Crawler.csproj"
     },
     "RoslynTesting": {
       "commandName": "DebugRoslynComponent",

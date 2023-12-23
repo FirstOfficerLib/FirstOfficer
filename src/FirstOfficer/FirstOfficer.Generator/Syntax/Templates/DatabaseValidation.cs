@@ -1,6 +1,6 @@
 ﻿using System.Text;
 using FirstOfficer.Generator.Extensions;
-using FirstOfficer.Generator.Helpers;
+using FirstOfficer.Generator.Services;
 using Microsoft.CodeAnalysis;
 using Pluralize.NET;
 
@@ -12,9 +12,9 @@ namespace FirstOfficer.Generator.Syntax.Templates
         internal static string GetTemplate(INamedTypeSymbol entitySymbol)
         {
             var sb = new StringBuilder();
-            var oneToOnes = CodeAnalysisHelper.GetOneToOneProperties(entitySymbol).ToArray();
-            var oneToMany = CodeAnalysisHelper.GetOneToManyProperties(entitySymbol).ToArray();
-            var properties = CodeAnalysisHelper.GetMappedProperties(entitySymbol).ToArray();
+            var oneToOnes = OrmSymbolService.GetOneToOneProperties(entitySymbol).ToArray();
+            var oneToMany = OrmSymbolService.GetOneToManyProperties(entitySymbol).ToArray();
+            var properties = OrmSymbolService.GetMappedProperties(entitySymbol).ToArray();
             var name = entitySymbol.Name;
             sb.Append($@"           private static void ValidateChildren(IEnumerable<{entitySymbol.FullName()}> entities, bool saveChildren)
         {{

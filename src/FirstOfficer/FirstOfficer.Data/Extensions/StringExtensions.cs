@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace FirstOfficer.Core.Extensions
+namespace FirstOfficer.Data.Extensions
 {
     public static class StringExtensions
     {
@@ -19,7 +19,7 @@ namespace FirstOfficer.Core.Extensions
         {
             if (string.IsNullOrEmpty(str)) return str;
 
-            TextInfo textInfo = CultureInfo.CurrentCulture.TextInfo;
+            TextInfo textInfo = CultureInfo.InvariantCulture.TextInfo;
 
             return string.Join(string.Empty, str.Split('_').Select(s => textInfo.ToTitleCase(s)));
         }

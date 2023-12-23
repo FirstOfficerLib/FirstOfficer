@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FirstOfficer.Core.Extensions
+namespace FirstOfficer.Data.Extensions
 {
     public static class DateTimeExtensions
     {

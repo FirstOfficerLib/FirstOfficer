@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Reflection;
-using FirstOfficer.Core.Extensions;
+using FirstOfficer.Data.Extensions;
 using Pluralize.NET;
 
 namespace FirstOfficer.Data

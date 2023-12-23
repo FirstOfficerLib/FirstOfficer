@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using System.Data;
-using System.Linq;
 using System.Reflection;
 using System.Text;
-using FirstOfficer.Core.Extensions;
+using FirstOfficer.Data;
 using FirstOfficer.Data.Attributes;
+using FirstOfficer.Generator.Extensions;
 using Microsoft.Extensions.Logging;
 using Npgsql;
-using Pluralize.NET;
 
-
-namespace FirstOfficer.Data
+namespace FirstOffice.Npgsql
 {
     public class PostgresDatabaseBuilder : IDatabaseBuilder
     {

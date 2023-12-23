@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FirstOffice.Npgsql;
 using FirstOfficer.Data;
 using FirstOfficer.Generator.Extensions;
 using FirstOfficer.Tests.Generator.Entities;

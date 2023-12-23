@@ -53,7 +53,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FirstOfficer.Api\FirstOfficer.Api.csproj" />
+    <ProjectReference Include="..\FirstOffice.Npgsql\FirstOffice.Npgsql.csproj" />
     <ProjectReference Include="..\FirstOfficer.Data\FirstOfficer.Data.csproj" />
     <ProjectReference Include="..\FirstOfficer.Generator\FirstOfficer.Generator.csproj" OutputItemType="Analyzer" ReferenceOutAssembly="false" />
   </ItemGroup>

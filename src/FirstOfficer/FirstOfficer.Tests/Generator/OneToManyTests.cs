@@ -10,6 +10,7 @@ using NUnit.Framework.Internal;
 
 namespace FirstOfficer.Tests.Generator
 {
+    [Parallelizable]
     public class OneToManyTests : FirstOfficerTest
     {
         //test saving book with pages

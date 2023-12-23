@@ -11,6 +11,7 @@ using NUnit.Framework.Internal;
 
 namespace FirstOfficer.Tests.Generator
 {
+    [Parallelizable]
     public class ManyToManyTests : FirstOfficerTest
     {
         //many to many tests for books and authors

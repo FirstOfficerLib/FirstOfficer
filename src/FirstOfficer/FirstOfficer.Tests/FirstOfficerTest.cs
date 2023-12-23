@@ -4,33 +4,49 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Docker.DotNet.Models;
+using DotNet.Testcontainers.Builders;
 using FirstOffice.Npgsql;
 using FirstOfficer.Data;
 using FirstOfficer.Generator.Extensions;
 using FirstOfficer.Tests.Generator.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 using Pluralize.NET;
+using DotNet.Testcontainers.Containers;
+using Testcontainers.PostgreSql;
 
 namespace FirstOfficer.Tests
 {
     [TestFixture]
     public abstract class FirstOfficerTest
     {
-        protected readonly NpgsqlConnection DbConnection = null!;
+        protected NpgsqlConnection DbConnection = null!;
+        private PostgreSqlContainer? _postgresContainer;
         protected IServiceProvider? ServiceProvider { get; private set; }
-        protected string ConnectionString { get; private set; }
+        protected string? ConnectionString { get; private set; }
 
         protected FirstOfficerTest()
         {
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+        }
+
+
+        [OneTimeSetUp]
+        public async Task OneTimeSetup()
+        {
+
             if (ServiceProvider != null)
             {
                 return;
             }
+
+            _postgresContainer = new PostgreSqlBuilder().WithDatabase("postgres").WithUsername("postgres").WithPassword("postgres").Build();
+            await _postgresContainer.StartAsync();
 
             var builder = Host.CreateDefaultBuilder();
 
@@ -44,10 +60,11 @@ namespace FirstOfficer.Tests
             var app = builder.ConfigureServices((builderContext, services) =>
             {
                 services.AddLogging(a => a.AddConsole());
+
                 services.AddTransient<IDbConnection>(a =>
                 {
                     var config = a.GetService<IConfiguration>();
-                    ConnectionString = config!.GetConnectionString("default");
+                    ConnectionString = _postgresContainer.GetConnectionString();
                     return new NpgsqlConnection(ConnectionString);
 
                 });
@@ -62,7 +79,7 @@ namespace FirstOfficer.Tests
             {
                 throw new Exception("DbConnection is null");
             }
-            DbConnection.Open();
+            await DbConnection.OpenAsync();
 
             var tables = new List<string>();
             do
@@ -78,7 +95,7 @@ namespace FirstOfficer.Tests
                     tables.Add(reader.GetString(0));
                 }
 
-                reader.Close();
+                await reader.CloseAsync();
 
                 foreach (var table in tables)
                 {
@@ -98,6 +115,7 @@ namespace FirstOfficer.Tests
             var dbBuilder = ServiceProvider!.GetService<IDatabaseBuilder>();
             dbBuilder!.BuildDatabase();
 
+
         }
 
         [OneTimeTearDown]
@@ -105,6 +123,10 @@ namespace FirstOfficer.Tests
         {
             await DbConnection!.CloseAsync();
             await DbConnection.DisposeAsync();
+            if (_postgresContainer != null)
+            {
+                await _postgresContainer.DisposeAsync();
+            }
         }
 
 
@@ -178,13 +200,13 @@ namespace FirstOfficer.Tests
             command.Dispose();
         }
 
-        protected void AssertManyToManySave<T1,T2>(List<T1> input1, List<T2> input2) where T1 : IEntity where T2 : IEntity
+        protected void AssertManyToManySave<T1, T2>(List<T1> input1, List<T2> input2) where T1 : IEntity where T2 : IEntity
         {
             var type1Name = input1.GetType().GetGenericArguments()[0].Name;
             var type2Name = input2.GetType().GetGenericArguments()[0].Name;
             var prop1Name = new Pluralizer().Pluralize(type2Name);
             var prop2Name = new Pluralizer().Pluralize(type1Name);
-            
+
             //assert T2 count 
             var sql = $"SELECT distinct author_id FROM {DataHelper.GetManyToManyTableName(type1Name, prop1Name, type2Name, prop2Name)}  WHERE {type1Name.ToSnakeCase()}_id in ({string.Join(",", input1.Select(a => a.Id))})";
             var command = DbConnection.CreateCommand();
@@ -197,7 +219,7 @@ namespace FirstOfficer.Tests
             //Assert the T2 entities were saved
             command.CommandText = "SELECT * FROM " + DataHelper.GetTableName<T2>() + " WHERE id in (" + string.Join(",", input2.Select(a => a.Id)) + ")";
             using var reader2 = command.ExecuteReader();
-            var dataTable2 = new DataTable(); 
+            var dataTable2 = new DataTable();
             dataTable2.Load(reader2);
             Assert.That(dataTable2.Rows.Count, Is.EqualTo(input2.Count));
 
@@ -215,7 +237,7 @@ namespace FirstOfficer.Tests
             var dataTable4 = new DataTable();
             dataTable4.Load(reader4);
             Assert.That(dataTable4.Rows.Count, Is.EqualTo(input1.Count));
-            
+
         }
 
 

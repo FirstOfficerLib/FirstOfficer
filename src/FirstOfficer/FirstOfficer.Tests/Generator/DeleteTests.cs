@@ -11,6 +11,7 @@ using Npgsql;
 
 namespace FirstOfficer.Tests.Generator
 {
+    [Parallelizable]
     [TestFixture]
     public class DeleteTests : FirstOfficerTest
     {

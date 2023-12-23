@@ -10,6 +10,7 @@ using FirstOfficer.Tests.Generator.Entities;
 
 namespace FirstOfficer.Tests.Generator
 {
+    [Parallelizable]
     public class OneToOneTests : FirstOfficerTest
     {
 

@@ -13,6 +13,7 @@ using Npgsql;
 namespace FirstOfficer.Tests.Generator
 {
     [TestFixture]
+    [Parallelizable]
     public class QueryTests : FirstOfficerTest
     {
 

@@ -25,7 +25,7 @@ jobs:
       working-directory: ./src/FirstOfficer
     - name: Build Generator
       run: dotnet build --no-restore
-      working-directory: ./src/FirstOfficer/FirstOfficer.Generator/FirstOfficer.Generator.csproj
+      working-directory: ./src/FirstOfficer/FirstOfficer.Generator
     - name: Build Solution
       run: dotnet build --no-restore
       working-directory: ./src/FirstOfficer

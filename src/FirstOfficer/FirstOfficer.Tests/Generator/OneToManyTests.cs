@@ -7,9 +7,11 @@ using System.Threading.Tasks;
 using FirstOfficer.Data.Query;
 using FirstOfficer.Data.Exceptions;
 using NUnit.Framework.Internal;
+#pragma warning disable VSTHRD200
 
 namespace FirstOfficer.Tests.Generator
 {
+    [Parallelizable]
     public class OneToManyTests : FirstOfficerTest
     {
         //test saving book with pages

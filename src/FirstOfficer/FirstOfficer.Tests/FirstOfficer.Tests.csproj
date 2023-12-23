@@ -49,7 +49,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Pluralize.NET" Version="1.0.2" />
-    <PackageReference Include="TestContainers.Container.Database.PostgreSql" Version="1.5.4" />
+    <PackageReference Include="Testcontainers" Version="3.6.0" />
+    <PackageReference Include="Testcontainers.PostgreSql" Version="3.6.0" />
   </ItemGroup>
 
   <ItemGroup>

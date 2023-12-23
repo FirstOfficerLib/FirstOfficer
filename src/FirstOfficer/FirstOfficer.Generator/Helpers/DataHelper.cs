@@ -15,37 +15,6 @@ namespace FirstOfficer.Generator.Helpers
             namePieces[lastIndex] = new Pluralizer().Pluralize(namePieces[lastIndex]);
             return string.Join("_", namePieces);
         }
-        internal static string GetDbType(Type type, int size = 255)
-        {
-            if (type.ToString() == typeof(DateTime).ToString())
-                return "timestamp  NOT NULL  DEFAULT ('1900-01-01') ";
-            if (type.ToString() == typeof(int).ToString())
-                return "INT NOT NULL  DEFAULT (0) ";
-            if (type.ToString() == typeof(long).ToString())
-                return "BIGINT NOT NULL  DEFAULT (0) ";
-            if (type.ToString() == typeof(bool).ToString())
-                return "BOOL NOT NULL DEFAULT ('f') ";
-            if (type.ToString() == typeof(decimal).ToString())
-                return "decimal(38,15) NOT NULL  DEFAULT (0) ";
-            if (type.ToString() == typeof(DateTime?).ToString())
-                return "timestamp  NULL ";
-            if (type.ToString() == typeof(int?).ToString())
-                return "INT NULL ";
-            if (type.ToString() == typeof(long?).ToString())
-                return "BIGINT NULL ";
-            if (type.ToString() == typeof(bool?).ToString())
-                return "BOOL NULL ";
-            if (type.ToString() == typeof(Guid).ToString())
-                return "UUID NOT NULL ";
-            if (type.ToString() == typeof(Guid?).ToString())
-                return "UUID NULL ";
-            if (type.ToString() == typeof(decimal?).ToString())
-                return "decimal(38,15) NULL ";
-            if (size == 0)
-                return "TEXT NULL ";
-            return $"VARCHAR({size}) NULL ";
-        }
-        
         internal static Dictionary<string, (IPropertySymbol, IPropertySymbol)> GetManyToMany(INamedTypeSymbol entityType)
         {
             var rtn = new Dictionary<string, (IPropertySymbol, IPropertySymbol)>();

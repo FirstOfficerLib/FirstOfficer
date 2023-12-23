@@ -8,10 +8,12 @@ using System.Threading.Tasks;
 using FirstOfficer.Data;
 using FirstOfficer.Tests.Generator.Entities;
 using Npgsql;
+#pragma warning disable VSTHRD200
 
 namespace FirstOfficer.Tests.Generator
 {
     [TestFixture]
+    [Parallelizable]
     public class SaveTests : FirstOfficerTest
     {
         [Test]
@@ -35,13 +37,13 @@ namespace FirstOfficer.Tests.Generator
             await transaction.CommitAsync();
 
             var sql = $"SELECT COUNT(*) FROM {DataHelper.GetTableName<Book>()}";
-            await using( var command = DbConnection.CreateCommand())
+            await using (var command = DbConnection.CreateCommand())
             {
                 command.CommandText = sql;
-                var count = command.ExecuteScalar();
+                var count = await command.ExecuteScalarAsync();
                 Assert.That(bookCount, Is.EqualTo(count)); //check count
             }
-            
+
             var allBooks = (await DbConnection.QueryBooks()).ToList();
             Assert.That(allBooks.Count(), Is.EqualTo(bookCount));
 
@@ -56,14 +58,14 @@ namespace FirstOfficer.Tests.Generator
                 Assert.That(source[a].ISBN, Is.EqualTo(destination[a].ISBN));
                 Assert.That(source[a].Description, Is.EqualTo(destination[a].Description));
             }
-            
+
 
             //delete all books
             sql = $"DELETE FROM {DataHelper.GetTableName<Book>()};";
             await using (var command = DbConnection.CreateCommand())
             {
                 command.CommandText = sql;
-                command.ExecuteNonQuery();
+                await command.ExecuteNonQueryAsync();
             }
             await transaction.DisposeAsync();
         }
@@ -92,7 +94,7 @@ namespace FirstOfficer.Tests.Generator
             await using (var command = DbConnection.CreateCommand())
             {
                 command.CommandText = sql;
-                var count = command.ExecuteScalar();
+                var count = await command.ExecuteScalarAsync();
                 Assert.That(bookCount, Is.EqualTo(count)); //check count
             }
 
@@ -126,7 +128,7 @@ namespace FirstOfficer.Tests.Generator
             await using (var command = DbConnection.CreateCommand())
             {
                 command.CommandText = sql;
-                command.ExecuteNonQuery();
+                await command.ExecuteNonQueryAsync();
             }
             await transaction.DisposeAsync();
         }
@@ -143,7 +145,7 @@ namespace FirstOfficer.Tests.Generator
                 Website = string.Empty.RandomString(10)
             };
             var transaction = await DbConnection.BeginTransactionAsync();
-            await DbConnection.SaveAuthor(author,transaction);
+            await DbConnection.SaveAuthor(author, transaction);
             await transaction.CommitAsync();
 
             //fetch author from DB
@@ -203,8 +205,8 @@ namespace FirstOfficer.Tests.Generator
             var command = DbConnection.CreateCommand();
             command.CommandText = sql;
             command.Parameters.AddWithValue("@id", book.Id);
-            command.ExecuteNonQuery();
-            command.Dispose();
+            await command.ExecuteNonQueryAsync();
+            await command.DisposeAsync();
             await transaction.DisposeAsync();
 
         }
@@ -220,7 +222,7 @@ namespace FirstOfficer.Tests.Generator
                 Title = string.Empty.RandomString(10)
             };
 
-       
+
             var transaction = await DbConnection.BeginTransactionAsync();
             await DbConnection.SaveBook(book, transaction);
             await transaction.CommitAsync();
@@ -239,6 +241,6 @@ namespace FirstOfficer.Tests.Generator
             await transaction.DisposeAsync();
         }
 
-          
+
     }
 }

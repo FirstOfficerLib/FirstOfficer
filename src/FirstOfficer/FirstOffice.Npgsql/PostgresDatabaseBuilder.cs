@@ -67,10 +67,40 @@ namespace FirstOffice.Npgsql
 
             AddForeignKeys(entityTypes);
 
-
             AddManyToManyTables(entityTypes);
 
+            AddIndexes(entityTypes);
+
             _logger.LogInformation("PostgresDatabaseBuilder Finished");
+        }
+
+        private void AddIndexes(List<Type> entityTypes)
+        {
+            foreach (var entityType in entityTypes)
+            {
+                var tableName = DataHelper.GetTableName(entityType);
+                var props = entityType.GetProperties().Where(a => (a.Name != "Id" && a.Name.EndsWith("Id")) ||
+                                                                  a.GetCustomAttribute<QueryableAttribute>() != null ||
+                                                                  a.GetCustomAttribute<OrderByAttribute>() != null).ToList();
+                foreach (var prop in props)
+                {
+                    var colName = DataHelper.GetColumnName(prop);
+                    var indexName = $"ix_{tableName}_{colName}";
+                    var sql = $"SELECT indexname FROM pg_indexes WHERE tablename = '{tableName}' AND indexname = '{indexName}';";
+                    using (var command = _connection.CreateCommand())
+                    {
+                        command.CommandText = sql;
+
+                        if (command.ExecuteScalar() != null)
+                        {
+                            continue;
+                        }
+
+                        sql = $"CREATE INDEX {indexName} ON {tableName} ({colName});";
+                        _connection.Execute(sql);
+                    }
+                }
+            }
         }
 
         private void AddManyToManyTables(List<Type> entityTypes)

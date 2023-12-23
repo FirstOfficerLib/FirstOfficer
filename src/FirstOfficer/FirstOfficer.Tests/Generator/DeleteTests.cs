@@ -8,9 +8,11 @@ using System.Threading.Tasks;
 using FirstOfficer.Data;
 using FirstOfficer.Tests.Generator.Entities;
 using Npgsql;
+#pragma warning disable VSTHRD200
 
 namespace FirstOfficer.Tests.Generator
 {
+    [Parallelizable]
     [TestFixture]
     public class DeleteTests : FirstOfficerTest
     {

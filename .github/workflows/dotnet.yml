@@ -22,10 +22,10 @@ jobs:
         dotnet-version: 8.0.x
     - name: Restore dependencies
       run: dotnet restore
-      working-directory: ./FirstOfficer    
+      working-directory: .    
     - name: Build Solution
       run: dotnet build --no-restore
-      working-directory: ./FirstOfficer
+      working-directory: .
       continue-on-error: true
     
     

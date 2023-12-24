@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "RoslynTesting": {
-      "commandName": "DebugRoslynComponent",
-      "targetProject": "..\\FirstOfficer.Console\\FirstOfficer.Console.csproj"
-    }
-  }
-}

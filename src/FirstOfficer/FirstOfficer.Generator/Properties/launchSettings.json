@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Roslyn": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "..\\..\\Compost\\Compost.Crawler\\Compost.Crawler.csproj"
+    },
+    "RoslynTesting": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "..\\FirstOfficer.Tests\\FirstOfficer.Tests.csproj"
+    }
+  }
+}

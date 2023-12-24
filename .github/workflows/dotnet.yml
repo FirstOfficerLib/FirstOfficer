@@ -22,16 +22,10 @@ jobs:
         dotnet-version: 8.0.x
     - name: Restore dependencies
       run: dotnet restore
-      working-directory: ./src/FirstOfficer
-    - name: Build Generator
-      run: dotnet build --no-restore
-      working-directory: ./src/FirstOfficer/FirstOfficer.Generator
+      working-directory: ./FirstOfficer    
     - name: Build Solution
       run: dotnet build --no-restore
-      working-directory: ./src/FirstOfficer
+      working-directory: ./FirstOfficer
       continue-on-error: true
-    - name: Build Solution 2
-      run: dotnet build --no-restore
-      working-directory: ./src/FirstOfficer
-      continue-on-error: true
+    
     

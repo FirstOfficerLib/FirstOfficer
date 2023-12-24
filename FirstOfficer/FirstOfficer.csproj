@@ -1,0 +1,104 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <EnablePackageValidation>true</EnablePackageValidation>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>true</ImplicitUsings>
+    <LangVersion>Latest</LangVersion>
+    <IsRoslynComponent>true</IsRoslynComponent>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <PackageProjectUrl>https://github.com/FirstOfficerLib/FirstOfficer</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/FirstOfficerLib/FirstOfficer</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>FirstOfficer;ORM;API;AI;SourceGeneration</PackageTags>
+    <IsPackable>true</IsPackable>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Version>0.0.0.3</Version>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <Authors>FirstOfficerLib;plankCode</Authors>
+    <Description>First Office is a C# code generation tool for building very high preformance Web APIs.</Description>
+  </PropertyGroup>
+
+
+  <ItemGroup>
+
+    <PackageReference Include="Microsoft.CodeAnalysis" Version="4.8.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="4.8.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.8.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Features" Version="4.8.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.Features" Version="4.8.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.Workspaces" Version="4.8.0" PrivateAssets="all" />        
+  </ItemGroup>
+
+  <ItemGroup>
+     <!--Generator dependencies -->
+   
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.0" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.0.0" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" GeneratePathProperty="true" PrivateAssets="all" />
+  
+    <PackageReference Include="Npgsql" Version="7.0.6" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="Pluralize.NET" Version="1.0.2" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.8.0"  GeneratePathProperty="true"  PrivateAssets="all" />
+    <PackageReference Include="System.Composition.TypedParts" Version="7.0.0"  GeneratePathProperty="true"  PrivateAssets="all" />
+    <PackageReference Include="System.Composition.Hosting" Version="7.0.0"  GeneratePathProperty="true"  PrivateAssets="all" />
+    <PackageReference Include="System.Composition.Runtime" Version="7.0.0"  GeneratePathProperty="true"  PrivateAssets="all" />
+    <PackageReference Include="System.Composition.AttributedModel" Version="7.0.0"  GeneratePathProperty="true"  PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0"  GeneratePathProperty="true"  PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0"  GeneratePathProperty="true"  PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Abstractions" Version="7.0.0" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="7.0.0" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="7.0.0" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.Primitives" Version="7.0.0" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="7.0.0" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="System.Text.Json" Version="7.0.3" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="7.0.0" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="System.Text.Encodings.Web" Version="7.0.0" GeneratePathProperty="true" PrivateAssets="all" />
+
+    
+  </ItemGroup>
+
+  <PropertyGroup>
+    <GetTargetPathDependsOn>$(GetTargetPathDependsOn);GetDependencyTargetPaths</GetTargetPathDependsOn>
+  </PropertyGroup>
+
+
+  <Target Name="GetDependencyTargetPaths">
+    <ItemGroup>
+      <TargetPathWithTargetPlatformMoniker Include="$(PKGNpgsql)\lib\netstandard2.0\Npgsql.dll" IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker Include="$(PKGPluralize_NET)\lib\netstandard2.0\Pluralize.NET.dll" IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker Include="$(PKGMicrosoft_CodeAnalysis_Workspaces_Common)\lib\netstandard2.0\Microsoft.CodeAnalysis.Workspaces.dll" IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker Include="$(PKGSystem_Composition_TypedParts)\lib\netstandard2.0\System.Composition.TypedParts.dll" IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker Include="$(PKGSystem_Composition_Hosting)\lib\netstandard2.0\*.dll" IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker Include="$(PKGSystem_Composition_Runtime)\lib\netstandard2.0\System.Composition.Runtime.dll" IncludeRuntimeDependency="false" />     
+      <TargetPathWithTargetPlatformMoniker Include="$(PKGMicrosoft_Extensions_Configuration_Json)\lib\netstandard2.0\Microsoft.Extensions.Configuration.Json.dll" IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker Include="$(PKGMicrosoft_Extensions_Hosting)\lib\netstandard2.0\Microsoft.Extensions.Hosting.dll" IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker Include="$(PKGMicrosoft_Extensions_Hosting_Abstractions)\lib\netstandard2.0\Microsoft.Extensions.Hosting.Abstractions.dll" IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker Include="$(PKGMicrosoft_Extensions_Logging_Abstractions)\lib\netstandard2.0\Microsoft.Extensions.Logging.Abstractions.dll" IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker Include="$(PKGSystem_Composition_AttributedModel)\lib\netstandard2.0\System.Composition.AttributedModel.dll" IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker Include="$(PKGMicrosoft_Extensions_Configuration_Abstractions)\lib\netstandard2.0\Microsoft.Extensions.Configuration.Abstractions.dll" IncludeRuntimeDependency="false" />            
+      <TargetPathWithTargetPlatformMoniker Include="$(PKGMicrosoft_Extensions_Configuration)\lib\netstandard2.0\Microsoft.Extensions.Configuration.dll" IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker Include="$(PKGMicrosoft_Extensions_FileProviders_Abstractions)\lib\netstandard2.0\Microsoft.Extensions.FileProviders.Abstractions.dll" IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker Include="$(PKGMicrosoft_Extensions_Configuration_FileExtensions)\lib\netstandard2.0\Microsoft.Extensions.Configuration.FileExtensions.dll" IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker Include="$(PKGMicrosoft_Extensions_FileProviders_Physical)\lib\netstandard2.0\Microsoft.Extensions.FileProviders.Physical.dll" IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker Include="$(PKGMicrosoft_Extensions_Primitives)\lib\netstandard2.0\Microsoft.Extensions.Primitives.dll" IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker Include="$(PKGMicrosoft_Extensions_FileSystemGlobbing)\lib\netstandard2.0\Microsoft.Extensions.FileSystemGlobbing.dll" IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker Include="$(PKGSystem_Text_Json)\lib\netstandard2.0\System.Text.Json.dll" IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker Include="$(PKGMicrosoft_Bcl_AsyncInterfaces)\lib\netstandard2.0\Microsoft.Bcl.AsyncInterfaces.dll" IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker Include="$(PKGSystem_Text_Encodings_Web)\lib\netstandard2.0\System.Text.Encodings.Web.dll" IncludeRuntimeDependency="false" />
+
+      
+    </ItemGroup>
+  </Target>
+ 
+
+</Project>

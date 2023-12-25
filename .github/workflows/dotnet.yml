@@ -22,7 +22,7 @@ jobs:
         dotnet-version: 8.0.x
     - name: Write app.Development.json
       run: |
-          echo "$APP_DEV_JSON" > ./FirstOfficer.Test/appsettings.Development.json
+          echo "$APP_DEV_JSON" > ./FirstOfficer.Tests/appsettings.Development.json
       env:
           APP_DEV_JSON: ${{ secrets.APPSETTINGS_DEVELOPMENT_JSON }}
     - name: Restore dependencies

@@ -8,14 +8,16 @@ namespace FirstOfficer.Generator.Services
         public IConfiguration GetAppSettings(GeneratorExecutionContext context)
         {
 
-            if (!context.AnalyzerConfigOptions.GlobalOptions.TryGetValue("build_property.projectdir", out var appSettingsPath))
+            if (!context.AnalyzerConfigOptions.GlobalOptions.TryGetValue("build_property.projectdir", out var path))
             {
                 throw new Exception("Could not find appsettings.Development.json");
 
             }
-            appSettingsPath = Path.Combine(appSettingsPath, "appsettings.Development.json");
+            var appDevSettingsPath = Path.Combine(path, "appsettings.Development.json");
+            var appSettindgPath = Path.Combine(path, "appsettings.Development.json");
             var builder = new ConfigurationBuilder();
-            builder.AddJsonFile(appSettingsPath, false, true);
+            builder.AddJsonFile(appDevSettingsPath, true, true);
+            builder.AddJsonFile(appSettindgPath, false, true);
             return builder.Build();
 
         }

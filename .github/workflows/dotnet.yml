@@ -20,12 +20,16 @@ jobs:
       uses: actions/setup-dotnet@v4.0.0
       with:
         dotnet-version: 8.0.x
+    - name: Write app.Development.json
+      run: |
+          echo "$APP_DEV_JSON" > ./FirstOfficer.Test/appsettings.Development.json
+      env:
+          APP_DEV_JSON: ${{ secrets.APPSETTINGS_DEVELOPMENT_JSON }}
     - name: Restore dependencies
       run: dotnet restore
       working-directory: .    
     - name: Build Solution
       run: dotnet build --no-restore
-      working-directory: .
-      continue-on-error: true
+      working-directory: .     
     
     

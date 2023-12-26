@@ -30,6 +30,9 @@ jobs:
       working-directory: .    
     - name: Build Solution
       run: dotnet build --no-restore
-      working-directory: .     
+      working-directory: .   
+    - name: Running Tests
+      run: dotnet test
+      working-directory: .   
     
     

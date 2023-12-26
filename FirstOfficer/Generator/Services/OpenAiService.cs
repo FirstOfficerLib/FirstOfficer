@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Headers;
+﻿using System.Net;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -20,7 +21,7 @@ namespace FirstOfficer.Generator.Services
             _orgId = configuration["FirstOfficer:OpenAi:OrgId"] ?? string.Empty;
         }
 
-        public async Task<string> GetSqlFromExpression(string expression, INamedTypeSymbol symbol)
+        public async Task<string> GetSqlFromExpression(string expression, INamedTypeSymbol? symbol = null)
         {
 
             var nullable = GetNullableList(expression, symbol);
@@ -29,11 +30,11 @@ namespace FirstOfficer.Generator.Services
 
             expression = CleanExpression(expression);
 
-            Root? rootObject;
+            Root? rootObject = null;
             do
             {
                 var httpClient = new HttpClient();
-                var payLoad = GetRequestJson(expression, symbol.Name);
+                var payLoad = GetRequestJson(expression, symbol?.Name ?? "Table");
                 var content = new StringContent(payLoad, Encoding.UTF8, "application/json");
                 var request =
                     new HttpRequestMessage(HttpMethod.Post, "https://api.openai.com/v1/chat/completions");
@@ -41,7 +42,31 @@ namespace FirstOfficer.Generator.Services
                 request.Headers.Add("OpenAI-Organization", _orgId);
                 request.Headers.Add("User-Agent", "FirstOfficer/0.0.0.1");
                 request.Content = content;
-                var response = await httpClient.SendAsync(request);
+                HttpResponseMessage? response = null;
+
+                var tries = 0;
+
+                while (tries < 10 && response is not { StatusCode: HttpStatusCode.OK })
+                {
+                    try
+                    {
+                        tries++;
+                        response = await httpClient.SendAsync(request);
+                        if (response is not {StatusCode: HttpStatusCode.OK}) 
+                        {
+                            await Task.Delay(500);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        await Task.Delay(500);
+                    }
+                }
+
+                if (response is null || response.StatusCode != HttpStatusCode.OK)
+                {
+                    continue;
+                }
 
                 var responsePayLoad = await response.Content.ReadAsStringAsync();
 
@@ -105,9 +130,14 @@ namespace FirstOfficer.Generator.Services
                    !responsePayLoad.ToLower().Contains("parameter_value");
         }
 
-        private (string, string)[] GetNullableList(string expression, INamedTypeSymbol symbol)
+        private (string, string)[] GetNullableList(string expression, INamedTypeSymbol? symbol)
         {
             var rtn = new List<(string, string)>();
+
+            if (symbol == null)
+            {
+                return rtn.ToArray();
+            }
 
             var properties = symbol.GetMembers().OfType<IPropertySymbol>().ToArray();
             foreach (var property in properties)

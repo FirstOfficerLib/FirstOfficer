@@ -1,0 +1,38 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: .NET
+
+on:
+  push:
+    branches: [ "branch/actions" ]
+  pull_request:
+    branches: [ "branch/actions" ]
+
+jobs:
+  build:
+  
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4.0.0
+      with:
+        dotnet-version: 8.0.x
+    - name: Write app.Development.json
+      run: |
+          echo "$APP_DEV_JSON" > ./FirstOfficer.Tests/appsettings.Development.json
+      env:
+          APP_DEV_JSON: ${{ secrets.APPSETTINGS_DEVELOPMENT_JSON }}
+    - name: Restore dependencies
+      run: dotnet restore
+      working-directory: .    
+    - name: Build Solution
+      run: dotnet build --no-restore
+      working-directory: .   
+    - name: Running Tests
+      run: dotnet test
+      working-directory: .   
+    
+    

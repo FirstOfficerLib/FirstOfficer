@@ -57,7 +57,8 @@ namespace FirstOfficer.Generator.Services
         {
             return SymbolService.GetAllProperties(entitySymbol).Where(a =>
                 a.Type is INamedTypeSymbol { IsGenericType: false } symbol &&
-                IsEntity(symbol)).ToArray();
+                IsEntity(symbol) && SymbolService.GetAllProperties(symbol)
+                    .Any(b => SymbolEqualityComparer.Default.Equals(b.Type, entitySymbol))).ToArray();
         }
 
 
@@ -70,8 +71,7 @@ namespace FirstOfficer.Generator.Services
                 symbol.TypeArguments.All(IsEntity))
                 .Where(a =>
                     SymbolService.GetAllProperties(((a.Type as INamedTypeSymbol)?.TypeArguments[0] as INamedTypeSymbol)!)
-                        .Any(b => b.Name == $"{entitySymbol.Name}Id")
-                )
+                        .Any(b => SymbolEqualityComparer.Default.Equals(b.Type, entitySymbol)))
                 .ToArray();
 
         }
@@ -120,5 +120,16 @@ namespace FirstOfficer.Generator.Services
         }
 
 
+        public static IPropertySymbol[] GetOneToManyAsChildProperties(INamedTypeSymbol entitySymbol)
+        {
+            return SymbolService.GetAllProperties(entitySymbol).Where(a =>
+                a.Type is INamedTypeSymbol { IsGenericType: false } symbol &&
+                IsEntity(symbol) && SymbolService.GetAllProperties(symbol!)  //get all properties of the collection type
+                    .Any(b => b.Type is       //make sure the property type is of entitySymbol type
+                                  INamedTypeSymbol s &&
+                              SymbolService.IsCollection(s) &&
+                              s.TypeArguments.Count() == 1 &&
+                              s.TypeArguments.All(c => SymbolEqualityComparer.Default.Equals(c, entitySymbol)))).ToArray();
+        }
     }
 }

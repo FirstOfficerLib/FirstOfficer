@@ -10,6 +10,6 @@ namespace FirstOfficer.Data
 
         [TextSize(64)] 
         [Queryable]
-        public virtual string Checksum { get; set; }
+        public virtual string? Checksum { get; set; }
     }
 }

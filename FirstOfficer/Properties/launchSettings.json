@@ -3,6 +3,9 @@
     "RoslynTesting": {
       "commandName": "DebugRoslynComponent",
       "targetProject": "..\\FirstOfficer.Tests\\FirstOfficer.Tests.csproj"
+    },
+    "Profile 1": {
+      "commandName": "DebugRoslynComponent"
     }
   }
 }

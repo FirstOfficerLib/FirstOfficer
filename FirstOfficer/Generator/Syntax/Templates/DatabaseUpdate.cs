@@ -64,14 +64,21 @@ namespace FirstOfficer.Generator.Syntax.Templates
                 var rtn = string.Empty;
                 var dataType = string.Empty;
 
-                if (((INamedTypeSymbol)prop.Type).FullName() == typeof(DateTime).FullName ||
-                    ((INamedTypeSymbol)prop.Type).FullName() == $"{typeof(DateTime).FullName}?")
+                if (((INamedTypeSymbol)prop.Type).FullName() == typeof(DateTime).FullName)
                 {
                     //GeneratedHelpers.RoundToNearestMillisecond
 
-                    rtn += $@"entity.{prop.Name} = GeneratedHelpers.RoundToNearestMillisecond(entity.{prop.Name});
+                    rtn += $@"entity.{prop.Name} = (DateTime)GeneratedHelpers.RoundToNearestMillisecond((DateTime?)entity.{prop.Name});
                                 ";
                 }
+
+                if (((INamedTypeSymbol)prop.Type).FullName() == $"{typeof(DateTime).FullName}?")
+                {
+                    rtn += $@"entity.{prop.Name} = GeneratedHelpers.RoundToNearestMillisecond((DateTime?)entity.{prop.Name});
+                                ";
+                }
+
+
 
                 if (((INamedTypeSymbol)prop.Type).FullName() == $"{typeof(bool).FullName}?")
                 {

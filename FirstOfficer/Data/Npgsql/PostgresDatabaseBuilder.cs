@@ -9,7 +9,7 @@ using Npgsql;
 
 namespace FirstOfficer.Data.Npgsql
 {
-    public class PostgresDatabaseBuilder : IDatabaseBuilder
+    public class PostgresDatabaseBuilder 
     {
 
         private readonly ILogger<PostgresDatabaseBuilder> _logger;

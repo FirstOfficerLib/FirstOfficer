@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace FirstOfficer.Data.Query
+﻿namespace FirstOfficer.Data.Query
 {
     public sealed class ParameterValues
     {
@@ -145,16 +139,16 @@ namespace FirstOfficer.Data.Query
             Value10 = CheckType(value10);
         }
 
-        public object Value1 { get; }
-        public object Value2 { get; }
-        public object Value3 { get; }
-        public object Value4 { get; }
-        public object Value5 { get; }
-        public object Value6 { get; }
-        public object Value7 { get; }
-        public object Value8 { get; }
-        public object Value9 { get; }
-        public object Value10 { get; }
+        public object? Value1 { get; }
+        public object? Value2 { get; }
+        public object? Value3 { get; }
+        public object? Value4 { get; }
+        public object? Value5 { get; }
+        public object? Value6 { get; }
+        public object? Value7 { get; }
+        public object? Value8 { get; }
+        public object? Value9 { get; }
+        public object? Value10 { get; }
     }
 
 }

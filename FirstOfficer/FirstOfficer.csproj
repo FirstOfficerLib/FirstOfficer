@@ -2,13 +2,13 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <EnablePackageValidation>true</EnablePackageValidation>
-    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <IncludeBuildOutput>true</IncludeBuildOutput>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
     <LangVersion>Latest</LangVersion>
     <IsRoslynComponent>true</IsRoslynComponent>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
     <PackageProjectUrl>https://github.com/FirstOfficerLib/FirstOfficer</PackageProjectUrl>
     <RepositoryUrl>https://github.com/FirstOfficerLib/FirstOfficer</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -19,8 +19,10 @@
     <Version>0.0.0.3</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Authors>FirstOfficerLib;plankCode</Authors>
-    <Description>First Office is a C# code generation tool for building very high preformance Web APIs.</Description>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Data\Npgsql\PostgresDatabaseBuilder.cs" />
+  </ItemGroup>
 
 
   <ItemGroup>
@@ -41,30 +43,34 @@
   <ItemGroup>
      <!--Generator dependencies -->
    
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.0" GeneratePathProperty="true" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.0.0" GeneratePathProperty="true" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" GeneratePathProperty="true" PrivateAssets="all" />
   
     <PackageReference Include="Npgsql" Version="7.0.6" GeneratePathProperty="true" PrivateAssets="all" />
     <PackageReference Include="Pluralize.NET" Version="1.0.2" GeneratePathProperty="true" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.8.0"  GeneratePathProperty="true"  PrivateAssets="all" />
-    <PackageReference Include="System.Composition.TypedParts" Version="7.0.0"  GeneratePathProperty="true"  PrivateAssets="all" />
-    <PackageReference Include="System.Composition.Hosting" Version="7.0.0"  GeneratePathProperty="true"  PrivateAssets="all" />
-    <PackageReference Include="System.Composition.Runtime" Version="7.0.0"  GeneratePathProperty="true"  PrivateAssets="all" />
-    <PackageReference Include="System.Composition.AttributedModel" Version="7.0.0"  GeneratePathProperty="true"  PrivateAssets="all" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0"  GeneratePathProperty="true"  PrivateAssets="all" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0"  GeneratePathProperty="true"  PrivateAssets="all" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" GeneratePathProperty="true" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Abstractions" Version="7.0.0" GeneratePathProperty="true" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="7.0.0" GeneratePathProperty="true" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="7.0.0" GeneratePathProperty="true" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.Extensions.Primitives" Version="7.0.0" GeneratePathProperty="true" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="7.0.0" GeneratePathProperty="true" PrivateAssets="all" />
-    <PackageReference Include="System.Text.Json" Version="7.0.3" GeneratePathProperty="true" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="7.0.0" GeneratePathProperty="true" PrivateAssets="all" />
-    <PackageReference Include="System.Text.Encodings.Web" Version="7.0.0" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.8.0" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="System.Composition.TypedParts" Version="8.0.0" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="System.Composition.Hosting" Version="8.0.0" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="System.Composition.Runtime" Version="8.0.0" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="System.Composition.AttributedModel" Version="8.0.0" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Abstractions" Version="8.0.0" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="8.0.0" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="8.0.0" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.Primitives" Version="8.0.0" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="8.0.0" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="System.Text.Json" Version="8.0.1" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="System.Text.Encodings.Web" Version="8.0.0" GeneratePathProperty="true" PrivateAssets="all" />
 
     
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Data\Npgsql\" />
   </ItemGroup>
 
   <PropertyGroup>

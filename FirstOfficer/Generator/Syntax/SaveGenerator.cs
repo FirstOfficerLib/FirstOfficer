@@ -22,6 +22,7 @@ namespace FirstOfficer.Generator.Syntax
             bodyBuilder.AppendLine("{");
             bodyBuilder.AppendLine("ValidateChildren(entities, saveChildren);");
             bodyBuilder.AppendLine("await SaveOneToOne(dbConnection, entities, transaction);");
+            bodyBuilder.AppendLine("await SaveOneToManyAsChild(dbConnection, entities, transaction);");
             bodyBuilder.AppendLine("}");
             bodyBuilder.AppendLine($"var insertEntities = new List<{entitySymbol.FullName()}>();");
             bodyBuilder.AppendLine($"var updateEntities = new List<{entitySymbol.FullName()}>();");

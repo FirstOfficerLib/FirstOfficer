@@ -10,7 +10,7 @@ namespace FirstOfficer.Tests.Generator.Entities
         [TextSize(0)] // Text
         public string Content { get; set; } = string.Empty;
 
-        public Book? Book { get; set; } = null;
+        public Book Book { get; set; } = null;
       
     }
 }

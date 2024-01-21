@@ -100,6 +100,12 @@ namespace FirstOfficer.Generator.StateManagement
 
             }
 
+            if (!attributeList.Any())
+            {
+                context.AddSource("StateStorage.g",
+                    SourceText.From(string.Empty, Encoding.UTF8));
+            }
+
             var attributeListItems = SyntaxFactory.AttributeList(SyntaxFactory.SeparatedList(attributeList.ToArray()));
 
             var classBlock = SyntaxFactory.ClassDeclaration("StateStorage")

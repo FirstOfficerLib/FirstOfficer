@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using FirstOfficer.Extensions;
-using FirstOfficer.Generator.Helpers;
 using FirstOfficer.Generator.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -12,7 +11,7 @@ using LiteralExpressionSyntax = Microsoft.CodeAnalysis.CSharp.Syntax.LiteralExpr
 
 namespace FirstOfficer.Generator
 {
-    [Generator]
+   // [Generator]
     public class QueryMethodsGenerator : ISourceGenerator
     {
         private static void CreateSource(SourceProductionContext context, Microsoft.CodeAnalysis.Compilation comp, List<string> methodNames)

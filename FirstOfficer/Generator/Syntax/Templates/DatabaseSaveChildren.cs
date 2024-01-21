@@ -16,6 +16,10 @@ namespace FirstOfficer.Generator.Syntax.Templates
             var oneToOnes = OrmSymbolService.GetOneToOneProperties(entitySymbol).ToArray();
             var oneToMany = OrmSymbolService.GetOneToManyProperties(entitySymbol).ToArray();
             var properties = OrmSymbolService.GetMappedProperties(entitySymbol).ToArray();
+
+            var oneToManyAsChild = OrmSymbolService.GetOneToManyAsChildProperties(entitySymbol).ToArray();
+
+
             var name = entitySymbol.Name;
 
             sb.AppendLine($@"
@@ -44,9 +48,9 @@ namespace FirstOfficer.Generator.Syntax.Templates
                 foreach (var oneToOne in oneToOnes)
                 {
 
-                    sb.AppendLine($@"if (entity.{oneToOne.Type.Name} != null)                            
+                    sb.AppendLine($@"if (entity.{oneToOne.Name} != null)                            
                         {{
-                             entity.{oneToOne.Type.Name}Id = entity.{oneToOne.Type.Name}.Id;
+                             entity.{new Pluralizer().Singularize(oneToOne.Name)}Id = entity.{oneToOne.Name}.Id;
                         }}                     
                     ");
                 }
@@ -56,6 +60,8 @@ namespace FirstOfficer.Generator.Syntax.Templates
                     ");
 
             }
+
+
 
             sb.AppendLine($@"  
             }}
@@ -77,6 +83,25 @@ namespace FirstOfficer.Generator.Syntax.Templates
 
             sb.AppendLine($@" }}");
 
+            sb.AppendLine($@"              
+            private static async Task SaveOneToManyAsChild(IDbConnection dbConnection, IEnumerable<{entitySymbol.FullName()}> entities, IDbTransaction transaction)
+            {{       
+
+            //handle one-to-many-as-child
+            ");
+
+            if (oneToManyAsChild.Any())
+            {
+                foreach (var oneToManyProperty in oneToManyAsChild)
+                {
+                    var childType = (INamedTypeSymbol)oneToManyProperty.Type;
+                    sb.AppendLine($"await dbConnection.Save{new Pluralizer().Pluralize(childType.Name)}(entities.Where(a=> a.{oneToManyProperty.Name} is not null).Select(a=> a.{oneToManyProperty.Name}), transaction);");
+                    sb.AppendLine($"entities.Where(a=> a.{oneToManyProperty.Name} is not null).ToList().ForEach(a=> a.{oneToManyProperty.Name}Id = a.{oneToManyProperty.Name}.Id);");
+                }
+            }
+
+            sb.AppendLine($@" }}");
+
             var manyToManyTypes = OrmSymbolService.GetManyToManyProperties(entitySymbol).ToArray();
 
             var manyToMany = DataHelper.GetManyToMany(entitySymbol);
@@ -93,12 +118,16 @@ namespace FirstOfficer.Generator.Syntax.Templates
                 var prop1IsEntity =
                     SymbolEqualityComparer.Default.Equals((manyToManyProperty.Value.Item1.Type as INamedTypeSymbol)?.TypeArguments[0], entitySymbol);
                 var prop1 = prop1IsEntity ? manyToManyProperty.Value.Item1 : manyToManyProperty.Value.Item2;
-                var type1 = (prop1.Type as INamedTypeSymbol)?.TypeArguments[0];
                 var idName1 = Data.DataHelper.GetIdColumnName(prop1.Name);
                 var prop2 = prop1IsEntity ? manyToManyProperty.Value.Item2 : manyToManyProperty.Value.Item1;
                 var type2 = (prop2.Type as INamedTypeSymbol)?.TypeArguments[0];
                 var idName2 = Data.DataHelper.GetIdColumnName(prop2.Name);
                 idName2 = Data.DataHelper.GetIdColumnName(prop2.Name, idName1 == idName2);  //handle many-to-many to self
+
+                if (type2 == null)
+                {
+                    continue;
+                }
 
                 sb.AppendLine($" await dbConnection.Save{new Pluralizer().Pluralize(type2.Name)}(entities.SelectMany(a=> a.{prop2.Name}), transaction);");
 

@@ -57,7 +57,7 @@ namespace FirstOfficer.Generator.Services
                             await Task.Delay(500);
                         }
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                         await Task.Delay(500);
                     }
@@ -72,9 +72,9 @@ namespace FirstOfficer.Generator.Services
 
                 rootObject = JsonSerializer.Deserialize<Root>(responsePayLoad);
 
-            } while (rootObject == null || !ValidatePayload(rootObject.Choices.First().Message.Content, expression, nullable));
+            } while (rootObject == null || !ValidatePayload(rootObject.Choices.First().Message?.Content, expression, nullable));
 
-            return rootObject.Choices.First().Message.Content;
+            return rootObject.Choices.First().Message?.Content ?? string.Empty;
 
         }
 
@@ -112,8 +112,14 @@ namespace FirstOfficer.Generator.Services
             return expression;
         }
 
-        private bool ValidatePayload(string responsePayLoad, string expression, (string, string)[] nullable)
+        private bool ValidatePayload(string? responsePayLoad, string expression, (string, string)[] nullable)
         {
+
+            if (responsePayLoad == null)
+            {
+                return false;
+            }
+
             var isNullCount = Regex.Matches(responsePayLoad.ToUpper(), Regex.Escape("IS NULL")).Count;
             var iLikeCount = Regex.Matches(responsePayLoad.ToUpper(), Regex.Escape("ILIKE")).Count;
             var containsCount = Regex.Matches(expression.ToUpper(), Regex.Escape("CONTAINS")).Count;
@@ -167,7 +173,7 @@ namespace FirstOfficer.Generator.Services
                     {{
                          ""model"": ""gpt-3.5-turbo-1106"",
                          ""messages"": [
-                            {{""role"": ""system"", ""content"":""This is for a code generation application for converting LamdbaExpressions into Postgres SQL statements in C#""}}, 
+                            {{""role"": ""system"", ""content"":""This is for a code generation application for converting LambdaExpressions into Postgres SQL statements in C#""}}, 
                             {{""role"": ""system"", ""content"":""use ANY for arrays""}},                                                 
                             {{""role"": ""system"", ""content"":""Single parameter for each Value""}}, 
                             {{""role"": ""system"", ""content"":""Table name is the_table""}},                               
@@ -188,22 +194,22 @@ namespace FirstOfficer.Generator.Services
         public class Root
         {
             [JsonPropertyName("id")]
-            public string Id { get; set; }
+            public string? Id { get; set; }
 
             [JsonPropertyName("object")]
-            public string Object { get; set; }
+            public string? Object { get; set; }
 
             [JsonPropertyName("created")]
-            public long Created { get; set; }
+            public long? Created { get; set; }
 
             [JsonPropertyName("model")]
-            public string Model { get; set; }
+            public string? Model { get; set; }
 
             [JsonPropertyName("choices")]
-            public List<Choice> Choices { get; set; }
+            public List<Choice> Choices { get; set; } = new();
 
             [JsonPropertyName("usage")]
-            public Usage Usage { get; set; }
+            public Usage? Usage { get; set; }
         }
 
         public class Choice
@@ -212,19 +218,19 @@ namespace FirstOfficer.Generator.Services
             public int Index { get; set; }
 
             [JsonPropertyName("message")]
-            public Message Message { get; set; }
+            public Message? Message { get; set; }
 
             [JsonPropertyName("finish_reason")]
-            public string FinishReason { get; set; }
+            public string? FinishReason { get; set; }
         }
 
         public class Message
         {
             [JsonPropertyName("role")]
-            public string Role { get; set; }
+            public string? Role { get; set; }
 
             [JsonPropertyName("content")]
-            public string Content { get; set; }
+            public string? Content { get; set; }
         }
 
         public class Usage

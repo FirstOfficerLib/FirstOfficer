@@ -1,9 +1,7 @@
-﻿using System;
-
-namespace FirstOfficer.Data.Attributes
+﻿namespace FirstOfficer.Data.Attributes
 {
 
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Property)]
     public class TextSizeAttribute: Attribute
     {
         public TextSizeAttribute(int size)

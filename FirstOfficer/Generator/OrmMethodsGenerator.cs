@@ -1,7 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Text;
+using FirstOfficer.Generator.Database;
 using FirstOfficer.Generator.Diagnostics;
-using FirstOfficer.Generator.Helpers;
 using FirstOfficer.Generator.Services;
 using FirstOfficer.Generator.StateManagement;
 using FirstOfficer.Generator.Syntax;
@@ -79,6 +79,9 @@ namespace FirstOfficer.Generator
 
             }
 
+            context.AddSource("DatabaseBuilder.g.cs", PostgresDatabaseBuilder.GenerateSource(comp, entitiesDeclarations));
+
+
             StateManager.SaveState(comp, context);
             Syntax.Templates.Helpers.GetTemplate(context);
 
@@ -97,7 +100,7 @@ namespace FirstOfficer.Generator
                 using Npgsql;   
                 using System.Text;
                 using System.Data.Common;
-
+                #pragma warning disable CS1998
                 namespace FirstOfficer
                 {{
                     public static class {className}

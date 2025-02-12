@@ -1,0 +1,1 @@
+﻿dotnet pack --configuration Release --output c:\localnugets -p:PackageVersion=0.0.14 --include-symbols

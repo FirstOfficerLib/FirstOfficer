@@ -42,12 +42,17 @@ namespace FirstOfficer.Generator.Syntax.Templates
 
             foreach (var prop in properties.Where(a => a.Name != "Checksum"))
             {
-                if (((INamedTypeSymbol)prop.Type).FullName() == typeof(DateTime).FullName ||
-                    ((INamedTypeSymbol)prop.Type).FullName() == typeof(DateTime?).FullName)
+                if (((INamedTypeSymbol)prop.Type).FullName() == typeof(DateTime).FullName)
                 {
                     //GeneratedHelpers.RoundToNearestMillisecond
 
-                    rtn += $@"entity.{prop.Name} = GeneratedHelpers.RoundToNearestMillisecond(entity.{prop.Name});
+                    rtn += $@"entity.{prop.Name} = (DateTime)GeneratedHelpers.RoundToNearestMillisecond((DateTime?)entity.{prop.Name});
+                                ";
+                }
+
+                if (((INamedTypeSymbol)prop.Type).FullName() == typeof(DateTime?).FullName)
+                {
+                    rtn += $@"entity.{prop.Name} = GeneratedHelpers.RoundToNearestMillisecond((DateTime?)entity.{prop.Name});
                                 ";
                 }
 

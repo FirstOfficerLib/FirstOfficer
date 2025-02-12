@@ -399,3 +399,4 @@ FodyWeavers.xsd
 *.local.json
 *.Development.json
 src/FirstOfficer/FirstOfficer.Tests/Generated/**
+FirstOfficer.Tests/Generated/

@@ -15,7 +15,7 @@ namespace FirstOfficer.Generator.Attributes
 
         public string GetQuery()
         {
-            return LambdaFunction?.Body.ToString();
+            return LambdaFunction?.Body.ToString() ?? string.Empty;
         }
     }
 }

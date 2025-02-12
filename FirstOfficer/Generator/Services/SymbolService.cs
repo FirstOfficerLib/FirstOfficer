@@ -36,7 +36,7 @@ namespace FirstOfficer.Generator.Services
         internal static bool IsCollection(ITypeSymbol? entitySymbol)
         {
             return IsTypeOrImplementsInterface(entitySymbol, typeof(IList)) ||
-                   IsTypeOrImplementsInterface(entitySymbol, $"ICollection");
+                   IsTypeOrImplementsInterface(entitySymbol, "ICollection");
 
         }
         internal static bool IsTypeOrImplementsInterface(ITypeSymbol? typeSymbol, Type targetType)
@@ -46,14 +46,19 @@ namespace FirstOfficer.Generator.Services
 
         internal static bool IsTypeOrImplementsInterface(ITypeSymbol? typeSymbol, string targetType)
         {
+            if (typeSymbol == null)
+            {
+                return false;
+            }
+
             if (typeSymbol.ToDisplayString().Split('<').First().EndsWith(targetType))
             {
                 return true;
             }
 
-            foreach (var iface in typeSymbol.AllInterfaces)
+            foreach (var interfaceSymbol in typeSymbol.AllInterfaces)
             {
-                if (iface.ToDisplayString().Split('<').First().EndsWith(targetType))
+                if (interfaceSymbol.ToDisplayString().Split('<').First().EndsWith(targetType))
                 {
                     return true;
                 }
@@ -63,6 +68,9 @@ namespace FirstOfficer.Generator.Services
         }
 
 
-
+        public static bool IsNullable(ITypeSymbol symbol)
+        {
+            return symbol.NullableAnnotation == NullableAnnotation.Annotated;
+        }
     }
 }

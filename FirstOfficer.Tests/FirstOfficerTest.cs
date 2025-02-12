@@ -16,8 +16,8 @@ using Npgsql;
 using Pluralize.NET;
 using DotNet.Testcontainers.Containers;
 using FirstOfficer.Data;
-using FirstOfficer.Data.Npgsql;
 using FirstOfficer.Extensions;
+using FirstOfficer.Generator.Database;
 using Testcontainers.PostgreSql;
 #pragma warning disable VSTHRD200
 
@@ -69,7 +69,7 @@ namespace FirstOfficer.Tests
                     return new NpgsqlConnection(ConnectionString);
 
                 });
-                services.AddSingleton<IDatabaseBuilder, PostgresDatabaseBuilder>();
+                services.AddSingleton<IDatabaseBuilder, DatabaseBuilder>();
 
             }).Build();
 

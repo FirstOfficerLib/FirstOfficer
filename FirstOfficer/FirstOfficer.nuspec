@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package >
+  <metadata>
+    <id>FirstOfficer</id>
+    <version>$version$</version>
+    <title>FirstOfficer</title>
+    <authors>plankCode</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">MIT</license>
+    <!-- <icon>icon.png</icon> -->
+    <description>TBD</description>
+    <releaseNotes>Summary</releaseNotes>
+    <copyright>2024</copyright>
+    <dependencies>
+      <group targetFramework=".NETStandard2.0">
+        <dependency id="Microsoft.CodeAnalysis" version="4.8.0" />
+        <dependency id="Microsoft.CodeAnalysis.Analyzers" version="3.3.4" />
+        <dependency id="Microsoft.CodeAnalysis.CSharp" version="4.8.0"  />
+        <dependency id="Microsoft.CodeAnalysis.CSharp" version="4.8.0"  />
+        <dependency id="Microsoft.CodeAnalysis.CSharp.Features" version="4.8.0"  />
+        <dependency id="Microsoft.CodeAnalysis.CSharp.Workspaces" version="4.8.0"  />
+        <dependency id="Microsoft.CodeAnalysis.Features" version="4.8.0"  />
+        <dependency id="Microsoft.CodeAnalysis.VisualBasic.Features" version="4.8.0"  />
+        <dependency id="Microsoft.CodeAnalysis.VisualBasic.Workspaces" version="4.8.0"  />
+        <dependency id="Microsoft.Extensions.Hosting" version="8.0.0" />
+        <dependency id="Microsoft.Extensions.Hosting.Abstractions" version="8.0.0" />
+        <dependency id="Microsoft.Extensions.Logging.Abstractions" version="8.0.0" />
+        <dependency id="Npgsql" version="7.0.6" />
+        <dependency id="Pluralize.NET" version="1.0.2" />
+        <dependency id="Microsoft.CodeAnalysis.Workspaces.Common" version="4.8.0" />
+        <dependency id="System.Composition.TypedParts" version="8.0.0" />
+        <dependency id="System.Composition.Hosting" version="8.0.0" />
+        <dependency id="System.Composition.Runtime" version="8.0.0" />
+        <dependency id="System.Composition.AttributedModel" version="8.0.0" />
+        <dependency id="Microsoft.Extensions.Configuration.Abstractions" version="8.0.0" />
+        <dependency id="Microsoft.Extensions.Configuration" version="8.0.0" />
+        <dependency id="Microsoft.Extensions.Configuration.Json" version="8.0.0" />
+        <dependency id="Microsoft.Extensions.FileProviders.Abstractions" version="8.0.0" />
+        <dependency id="Microsoft.Extensions.Configuration.FileExtensions" version="8.0.0" />
+        <dependency id="Microsoft.Extensions.FileProviders.Physical" version="8.0.0" />
+        <dependency id="Microsoft.Extensions.Primitives" version="8.0.0" />
+        <dependency id="Microsoft.Extensions.FileSystemGlobbing" version="8.0.0" />
+        <dependency id="System.Text.Json" version="8.0.1" />
+        <dependency id="Microsoft.Bcl.AsyncInterfaces" version="8.0.0" />
+        <dependency id="System.Text.Encodings.Web" version="8.0.0" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <!-- Include your analyzer DLL in the analyzers/dotnet/cs folder -->
+    <file src="bin/Release/netstandard2.0/FirstOfficer.dll" target="analyzers/dotnet/cs/FirstOfficer.dll" />
+    <file src="bin/Release/netstandard2.0/Pluralize.NET.dll" target="analyzers/dotnet/cs/Pluralize.NET.dll" />
+    <file src="bin/Release/netstandard2.0/Microsoft.Extensions.Configuration.Abstractions.dll" target="analyzers/dotnet/cs/Microsoft.Extensions.Configuration.Abstractions.dll" />
+    <file src="bin/Release/netstandard2.0/Microsoft.Extensions.Configuration.dll" target="analyzers/dotnet/cs/Microsoft.Extensions.Configuration.dll" />
+    <file src="bin/Release/netstandard2.0/Microsoft.Extensions.Configuration.Json.dll" target="analyzers/dotnet/cs/Microsoft.Extensions.Configuration.Json.dll" />
+    <file src="bin/Release/netstandard2.0/Microsoft.Extensions.FileProviders.Abstractions.dll" target="analyzers/dotnet/cs/Microsoft.Extensions.FileProviders.Abstractions.dll" />
+    <file src="bin/Release/netstandard2.0/Microsoft.Extensions.Configuration.FileExtensions.dll" target="analyzers/dotnet/cs/Microsoft.Extensions.Configuration.FileExtensions.dll" />
+    <file src="bin/Release/netstandard2.0/Microsoft.Extensions.FileProviders.Physical.dll" target="analyzers/dotnet/cs/Microsoft.Extensions.FileProviders.Physical.dll" />
+    <file src="bin/Release/netstandard2.0/Microsoft.Extensions.Primitives.dll" target="analyzers/dotnet/cs/Microsoft.Extensions.Primitives.dll" />
+    <file src="bin/Release/netstandard2.0/Microsoft.Extensions.FileSystemGlobbing.dll" target="analyzers/dotnet/cs/Microsoft.Extensions.FileSystemGlobbing.dll" />
+    <file src="bin/Release/netstandard2.0/System.Text.Json.dll" target="analyzers/dotnet/cs/System.Text.Json.dll" />
+    <file src="bin/Release/netstandard2.0/Microsoft.Bcl.AsyncInterfaces.dll" target="analyzers/dotnet/cs/Microsoft.Bcl.AsyncInterfaces.dll" />
+    <file src="bin/Release/netstandard2.0/System.Text.Encodings.Web.dll" target="analyzers/dotnet/cs/System.Text.Encodings.Web.dll" />
+    <file src="bin/Release/netstandard2.0/Microsoft.Extensions.Hosting.dll" target="analyzers/dotnet/cs/Microsoft.Extensions.Hosting.dll" />
+    <file src="bin/Release/netstandard2.0/Microsoft.Extensions.Hosting.Abstractions.dll" target="analyzers/dotnet/cs/Microsoft.Extensions.Hosting.Abstractions.dll" />
+    <file src="bin/Release/netstandard2.0/Microsoft.Extensions.Logging.Abstractions.dll" target="analyzers/dotnet/cs/Microsoft.Extensions.Logging.Abstractions.dll" />
+    
+     <!-- Include your analyzer DLL in the LIB folder -->
+    <file src="bin/Release/netstandard2.0/FirstOfficer.dll" target="lib/netstandard2.0/FirstOfficer.dll" />        
+    <file src="bin/Release/netstandard2.0/Pluralize.NET.dll" target="lib/netstandard2.0/Pluralize.NET.dll" />
+
+    
+  </files>
+</package>

@@ -36,7 +36,7 @@ namespace FirstOfficer.Generator.Services
         internal static bool IsCollection(ITypeSymbol? entitySymbol)
         {
             return IsTypeOrImplementsInterface(entitySymbol, typeof(IList)) ||
-                   IsTypeOrImplementsInterface(entitySymbol, $"ICollection");
+                   IsTypeOrImplementsInterface(entitySymbol, "ICollection");
 
         }
         internal static bool IsTypeOrImplementsInterface(ITypeSymbol? typeSymbol, Type targetType)

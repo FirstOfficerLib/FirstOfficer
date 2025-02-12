@@ -11,7 +11,7 @@ using LiteralExpressionSyntax = Microsoft.CodeAnalysis.CSharp.Syntax.LiteralExpr
 
 namespace FirstOfficer.Generator
 {
-   // [Generator]
+    [Generator]
     public class QueryMethodsGenerator : ISourceGenerator
     {
         private static void CreateSource(SourceProductionContext context, Microsoft.CodeAnalysis.Compilation comp, List<string> methodNames)
